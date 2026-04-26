@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DIECAST INDONESIA</title>
+  <meta name="description"
+    content="DIECAST INDONESIA hadirkan koleksi diecast scale model premium terbaik dari seluruh dunia. Temukan miniatur kendaraan impianmu – Ferrari, Lamborghini, Muscle Cars, dan banyak lagi." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-container">
+      <a href="#home" class="nav-logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">DIECAST<span class="logo-accent"> INDONESIA</span></span>
+      </a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home" class="nav-link active">Home</a></li>
+        <li><a href="#products" class="nav-link">Koleksi</a></li>
+        <li><a href="#features" class="nav-link">Keunggulan</a></li>
+        <li><a href="#testimonials" class="nav-link">Testimoni</a></li>
+        <li><a href="#contact" class="nav-link">Kontak</a></li>
+      </ul>
+      <a href="#products" class="nav-cta">Shop Now</a>
+      <button class="cart-toggle" id="cartToggle" aria-label="Keranjang Belanja">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0" />
+        </svg>
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION -->
+  <section class="hero" id="home">
+    <div class="hero-bg">
+      <div class="hero-glow hero-glow-1"></div>
+      <div class="hero-glow hero-glow-2"></div>
+      <div class="hero-glow hero-glow-3"></div>
+      <div class="grid-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        Premium Diecast Scale Models
+      </div>
+      <h1 class="hero-title">
+        Koleksi <span class="gradient-text">Diecast</span><br />
+        Terbaik di Indonesia
+      </h1>
+      <p class="hero-subtitle">
+        Hadirkan passion otomotifmu ke level berikutnya. Temukan miniatur kendaraan ikonik dengan detail presisi tinggi
+        — dari supercar hingga muscle car legendaris.
+      </p>
+      <div class="hero-buttons">
+        <a href="#products" class="btn btn-primary" id="heroShopBtn">
+          <span>Lihat Koleksi</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </a>
+        <a href="#features" class="btn btn-outline" id="heroLearnBtn">
+          Kenapa DIECAST INDONESIA?
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-number" data-target="500">0</div>
+          <div class="stat-label">Model Tersedia</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-number" data-target="12000">0</div>
+          <div class="stat-label">Pelanggan Puas</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <div class="stat-number" data-target="5">0</div>
+          <div class="stat-label">Tahun Berpengalaman</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-image-wrap">
+      <div class="hero-image-glow"></div>
+      <img src="assets/hero.png" alt="Koleksi Diecast Premium DIECAST INDONESIA" class="hero-img" id="heroImg" />
+      <div class="floating-badge badge-top-right">
+        <span>🏆</span> #1 Indonesia
+      </div>
+      <div class="floating-badge badge-bottom-left">
+        <span>🚗</span> 1:64 Scale
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- MARQUEE BRANDS -->
+  <div class="marquee-section">
+    <div class="marquee-track">
+      <div class="marquee-content">
+        <span>🏎 MatchBox</span>
+        <span>⚡ MiniGT</span>
+        <span>🔥 Hot Wheels</span>
+        <span>💎 Burago</span>
+        <span>🏁 Tomica</span>
+        <span>🏎 MatchBox</span>
+        <span>⚡ MiniGT</span>
+        <span>🔥 Hot Wheels</span>
+        <span>💎 Burago</span>
+        <span>🏁 Tomica</span>
+        <span>🏎 MatchBox</span>
+        <span>⚡ MiniGT</span>
+        <span>🔥 Hot Wheels</span>
+        <span>💎 Burago</span>
+        <span>🏁 Tomica</span>
+        <!-- <span>⭐ Kyosho</span>
+        <span>🎯 Minichamps</span>
+        <span>🚀 AUTOart</span>
+        <span>🏎 Ferrari</span>
+        <span>⚡ Lamborghini</span>
+        <span>🔥 Hot Wheels</span>
+        <span>💎 Burago</span>
+        <span>🏁 Maisto</span>
+        <span>⭐ Kyosho</span>
+        <span>🎯 Minichamps</span>
+        <span>🚀 AUTOart</span> -->
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS SECTION -->
+  <section class="products-section" id="products">
+    <div class="section-container">
+      <div class="section-header">
+        <div class="section-tag">Koleksi Terfeatured</div>
+        <h2 class="section-title">Pilih <span class="gradient-text">Favoritmu</span></h2>
+        <p class="section-desc">Dari supercar mewah hingga muscle car klasik — semua ada di DIECAST INDONESIA dengan
+          kualitas
+          premium dan harga terjangkau.</p>
+      </div>
+
+      <div class="product-filter">
+        <button class="filter-btn active" data-filter="all" id="filterAll">Semua</button>
+        <button class="filter-btn" data-filter="supercar" id="filterSupercar">Supercar</button>
+        <button class="filter-btn" data-filter="muscle" id="filterMuscle">Muscle Car</button>
+        <button class="filter-btn" data-filter="jdm" id="filterJDM">JDM</button>
+        <button class="filter-btn" data-filter="limited" id="filterLimited">Limited Edition</button>
+      </div>
+
+      <div class="products-grid">
+        <div class="product-card" data-category="supercar" id="card1" data-name="Ferrari 360 Modena – 1:64 Scale"
+          data-price="850000" data-emoji="🏎️">
+          <div class="product-badge badge-hot">🔥 Hot</div>
+          <div class="product-img-wrap" onmouseenter="aktifkan3D(this)" onmouseleave="matikan3D(this)"
+            data-model="1999_ferrari_360_modena/scene.gltf">
+            <img src="assets/ferrari_static.png" class="product-img">
+            <div class="model-hint">
+              <i class="fas fa-cube"></i> <span>Klik/Hover untuk 3D</span>
+            </div>
+            <!-- <model-viewer 
+             id="ferrari-model" 
+             class="model" src="1999_ferrari_360_modena/scene.gltf"
+             alt="Ferrari 360 Modena 3D Model" 
+             shadow-intensity="1.5" 
+             shadow-softness="1" 
+             environment-image="neutral" 
+             exposure="1" 
+             poster="assets/product1.png" 
+             loading="lazy" 
+             reveal="manual" 
+             disable-tap
+             interaction-prompt="none" 
+             camera-target="0m 0m 0m" 
+             camera-controls 
+             disable-zoom 
+             auto-rotate-delay="0"
+             bounds="tight" 
+             min-field-of-view="10deg" 
+             rotation-per-second="30deg"
+             style="width: 100%; height: 100%;
+             background-color: transparent;" 
+             auto-rotate>
+            </model-viewer> -->
+            <div class="vignette-overlay"></div>
+          </div>
+          <div class="product-info">
+            <div class="product-brand">Ferrari</div>
+            <h3 class="product-name">Ferrari 360 Modena – 1:64 Scale</h3>
+            <div class="product-rating">
+              <span class="stars">★★★★★</span>
+              <span class="rating-count">(248)</span>
+            </div>
+            <div class="product-price-row">
+              <div class="product-price">Rp 850.000</div>
+              <div class="product-price-old">Rp 1.200.000</div>
+            </div>
+            <div class="product-tag">Diecast Metal Premium</div>
+            <button class="add-to-cart-main add-to-cart-btn">🛒 Tambah ke Keranjang</button>
+          </div>
+        </div>
+
+        <div class="product-card" data-category="supercar" id="card2" data-name="Nissan Z (RZ34) – 1:64 Scale"
+          data-price="850000" data-emoji="🏎️">
+          <div class="product-badge badge-hot">🔥 Hot</div>
+          <div class="product-img-wrap" onmouseenter="aktifkan3D(this)" onmouseleave="matikan3D(this)"
+            data-model="nissan/scene.gltf">
+            <img src="assets/product2.png" class="product-img">
+            <div class="model-hint">
+              <i class="fas fa-cube"></i> <span>Klik/Hover untuk 3D</span>
+            </div>
+            <!-- <model-viewer 
+             id="ferrari-model" 
+             class="model" src="1999_ferrari_360_modena/scene.gltf"
+             alt="Ferrari 360 Modena 3D Model" 
+             shadow-intensity="1.5" 
+             shadow-softness="1" 
+             environment-image="neutral" 
+             exposure="1" 
+             poster="assets/product1.png" 
+             loading="lazy" 
+             reveal="manual" 
+             disable-tap
+             interaction-prompt="none" 
+             camera-target="0m 0m 0m" 
+             camera-controls 
+             disable-zoom 
+             auto-rotate-delay="0"
+             bounds="tight" 
+             min-field-of-view="10deg" 
+             rotation-per-second="30deg"
+             style="width: 100%; height: 100%;
+             background-color: transparent;" 
+             auto-rotate>
+            </model-viewer> -->
+            <div class="vignette-overlay"></div>
+          </div>
+          <div class="product-info">
+            <div class="product-brand">Nissan</div>
+            <h3 class="product-name">Nissan Z (RZ34) – 1:64 Scale</h3>
+            <div class="product-rating">
+              <span class="stars">★★★★★</span>
+              <span class="rating-count">(248)</span>
+            </div>
+            <div class="product-price-row">
+              <div class="product-price">Rp 850.000</div>
+              <div class="product-price-old">Rp 1.200.000</div>
+            </div>
+            <div class="product-tag">Diecast Metal Premium</div>
+            <button class="add-to-cart-main add-to-cart-btn">🛒 Tambah ke Keranjang</button>
+          </div>
+        </div>
+
+        <div class="product-card" data-category="muscle" id="card3" data-name="Muscle Car Collection Set – 1:64"
+          data-price="450000" data-emoji="🔥">
+          <div class="product-badge badge-new">🆕 New</div>
+          <div class="product-img-wrap">
+            <img src="assets/product2.png" alt="Muscle Car Diecast Collection" class="product-img" />
+
+          </div>
+          <div class="product-info">
+            <div class="product-brand">Hot Wheels</div>
+            <h3 class="product-name">Muscle Car Collection Set – 1:64</h3>
+            <div class="product-rating">
+              <span class="stars">★★★★☆</span>
+              <span class="rating-count">(317)</span>
+            </div>
+            <div class="product-price-row">
+              <div class="product-price">Rp 450.000</div>
+              <div class="product-price-old">Rp 600.000</div>
+            </div>
+            <div class="product-tag">Set 5 Pcs · Die-cast Metal</div>
+            <button class="add-to-cart-main add-to-cart-btn">🛒 Tambah ke Keranjang</button>
+          </div>
+        </div>
+
+        <div class="product-card" data-category="jdm" id="card4" data-name="Nissan Skyline GT-R R34 – 1:18"
+          data-price="950000" data-emoji="🚗">
+          <div class="product-img-wrap">
+            <div class="product-img-placeholder">
+              <div class="car-icon">🚗</div>
+              <div class="car-label">Nissan GTR R34</div>
+            </div>
+
+          </div>
+          <div class="product-info">
+            <div class="product-brand">Nissan</div>
+            <h3 class="product-name">Nissan Skyline GT-R R34 – 1:18</h3>
+            <div class="product-rating">
+              <span class="stars">★★★★★</span>
+              <span class="rating-count">(421)</span>
+            </div>
+            <div class="product-price-row">
+              <div class="product-price">Rp 950.000</div>
+              <div class="product-price-old">Rp 1.250.000</div>
+            </div>
+            <div class="product-tag">JDM Legend · 1:18 Scale</div>
+            <button class="add-to-cart-main add-to-cart-btn">🛒 Tambah ke Keranjang</button>
+          </div>
+        </div>
+
+        <div class="product-card" data-category="supercar" id="card5" data-name="McLaren 720S Spider – 1:18"
+          data-price="1100000" data-emoji="🏎️">
+          <div class="product-img-wrap">
+            <div class="product-img-placeholder">
+              <div class="car-icon">🏎</div>
+              <div class="car-label">McLaren 720S</div>
+            </div>
+
+          </div>
+          <div class="product-info">
+            <div class="product-brand">McLaren</div>
+            <h3 class="product-name">McLaren 720S Spider – 1:18</h3>
+            <div class="product-rating">
+              <span class="stars">★★★★★</span>
+              <span class="rating-count">(156)</span>
+            </div>
+            <div class="product-price-row">
+              <div class="product-price">Rp 1.100.000</div>
+              <div class="product-price-old">Rp 1.450.000</div>
+            </div>
+            <div class="product-tag">British Supercar · Metal Body</div>
+            <button class="add-to-cart-main add-to-cart-btn">🛒 Tambah ke Keranjang</button>
+          </div>
+        </div>
+
+        <div class="product-card" data-category="muscle" id="card6" data-name="Ford Mustang Shelby GT500 – 1:18"
+          data-price="630000" data-emoji="💪">
+          <div class="product-badge badge-sale">🎯 Sale 30%</div>
+          <div class="product-img-wrap">
+            <div class="product-img-placeholder">
+              <div class="car-icon">💪</div>
+              <div class="car-label">Ford Mustang</div>
+            </div>
+
+          </div>
+          <div class="product-info">
+            <div class="product-brand">Ford</div>
+            <h3 class="product-name">Ford Mustang Shelby GT500 – 1:18</h3>
+            <div class="product-rating">
+              <span class="stars">★★★★☆</span>
+              <span class="rating-count">(289)</span>
+            </div>
+            <div class="product-price-row">
+              <div class="product-price">Rp 630.000</div>
+              <div class="product-price-old">Rp 900.000</div>
+            </div>
+            <div class="product-tag">American Muscle · Sale</div>
+            <button class="add-to-cart-main add-to-cart-btn">🛒 Tambah ke Keranjang</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="products-cta">
+        <a href="#contact" class="btn btn-primary" id="viewMoreBtn">
+          <span>Lihat Semua Koleksi</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES SECTION -->
+  <section class="features-section" id="features">
+    <div class="features-bg">
+      <div class="features-glow"></div>
+    </div>
+    <div class="section-container">
+      <div class="section-header">
+        <div class="section-tag">Kenapa DIECAST INDONESIA?</div>
+        <h2 class="section-title">Kualitas yang Berbicara <span class="gradient-text">Sendiri</span></h2>
+        <p class="section-desc">Kami tidak hanya jual mainan — kami jual pengalaman koleksi otomotif yang sesungguhnya.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card" id="feat1">
+          <div class="feature-icon">
+            <div class="icon-bg"></div>
+            <span>🎯</span>
+          </div>
+          <h3 class="feature-title">Presisi Detail Tinggi</h3>
+          <p class="feature-desc">Setiap model direproduksi dengan detail 1:1 terhadap kendaraan aslinya – dari panel
+            bodi hingga interior yang akurat.</p>
+        </div>
+        <div class="feature-card" id="feat2">
+          <div class="feature-icon">
+            <div class="icon-bg"></div>
+            <span>🛡️</span>
+          </div>
+          <h3 class="feature-title">Material Premium</h3>
+          <p class="feature-desc">Dibuat dari alloy zinc & aluminum berkualitas tinggi dengan finishing cat multi-layer
+            yang tahan lama dan tak mudah pudar.</p>
+        </div>
+        <div class="feature-card" id="feat3">
+          <div class="feature-icon">
+            <div class="icon-bg"></div>
+            <span>✅</span>
+          </div>
+          <h3 class="feature-title">Garansi Keaslian</h3>
+          <p class="feature-desc">Semua produk 100% original berlisensi resmi. Tersedia sertifikat keaslian dan
+            packaging premium untuk setiap pembelian.</p>
+        </div>
+        <div class="feature-card" id="feat4">
+          <div class="feature-icon">
+            <div class="icon-bg"></div>
+            <span>🚀</span>
+          </div>
+          <h3 class="feature-title">Pengiriman Aman</h3>
+          <p class="feature-desc">Dikemas dengan bubble wrap & foam khusus. Pengiriman ke seluruh Indonesia dengan
+            tracking real-time dan asuransi barang.</p>
+        </div>
+        <div class="feature-card" id="feat5">
+          <div class="feature-icon">
+            <div class="icon-bg"></div>
+            <span>💬</span>
+          </div>
+          <h3 class="feature-title">Komunitas Kolektor</h3>
+          <p class="feature-desc">Bergabung dengan 12.000+ kolektor aktif Indonesia. Share koleksi, diskusi, dan
+            dapatkan info pre-order eksklusif lebih awal.</p>
+        </div>
+        <div class="feature-card" id="feat6">
+          <div class="feature-icon">
+            <div class="icon-bg"></div>
+            <span>💰</span>
+          </div>
+          <h3 class="feature-title">Harga Kompetitif</h3>
+          <p class="feature-desc">Harga terbaik di kelasnya. Tersedia cicilan 0% dan promo bulanan. Investasi koleksi
+            yang nilainya terus naik dari waktu ke waktu.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROMO BANNER -->
+  <section class="promo-banner">
+    <div class="promo-bg">
+      <div class="promo-glow-1"></div>
+      <div class="promo-glow-2"></div>
+    </div>
+    <div class="promo-content">
+      <div class="promo-tag">⏰ Flash Sale – Terbatas!</div>
+      <h2 class="promo-title">Diskon hingga <span class="promo-highlight">40%</span><br />untuk Koleksi Pilihan</h2>
+      <p class="promo-desc">Jangan lewatkan penawaran eksklusif ini. Stok terbatas, grab yours now!</p>
+      <div class="countdown" id="countdown">
+        <div class="count-item">
+          <div class="count-num" id="countHours">08</div>
+          <div class="count-label">Jam</div>
+        </div>
+        <div class="count-sep">:</div>
+        <div class="count-item">
+          <div class="count-num" id="countMinutes">45</div>
+          <div class="count-label">Menit</div>
+        </div>
+        <div class="count-sep">:</div>
+        <div class="count-item">
+          <div class="count-num" id="countSeconds">30</div>
+          <div class="count-label">Detik</div>
+        </div>
+      </div>
+      <a href="#products" class="btn btn-white" id="promoBtn">Ambil Penawaran Ini</a>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="testimonials-section" id="testimonials">
+    <div class="section-container">
+      <div class="section-header">
+        <div class="section-tag">Kata Mereka</div>
+        <h2 class="section-title">Dipercaya <span class="gradient-text">12.000+</span> Kolektor</h2>
+        <p class="section-desc">Jangan cuma percaya kata kami — dengar langsung dari para kolektor yang sudah buktikan
+          sendiri.</p>
+      </div>
+
+      <div class="testimonials-grid">
+        <div class="testimonial-card" id="testi1">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"Kualitasnya luar biasa! Ferrari 488 yang gue beli detail banget sampai ke interior.
+            Packaging-nya juga rapi dan aman. Ini jadi favorit di koleksi gue!"</p>
+          <div class="testi-author">
+            <div class="testi-avatar">RD</div>
+            <div class="testi-info">
+              <div class="testi-name">Rizky Dwi</div>
+              <div class="testi-role">Kolektor – Jakarta</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card featured-testi" id="testi2">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"Udah beli 15+ item dari DIECAST INDONESIA dan gak pernah kecewa sekalipun. Harganya
+            fair,
+            pelayanannya cepat, dan komunitasnya seru banget. Highly recommended buat kolektor Indonesia!"</p>
+          <div class="testi-author">
+            <div class="testi-avatar">AP</div>
+            <div class="testi-info">
+              <div class="testi-name">Andi Pratama</div>
+              <div class="testi-role">Hardcore Collector – Surabaya</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card" id="testi3">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text">"Limited edition Lamborghini gold-nya WOW banget. Nilainya udah naik dari harga beli.
+            DIECAST INDONESIA emang tempat invest yang tepat buat para kolektor!"</p>
+          <div class="testi-author">
+            <div class="testi-avatar">SR</div>
+            <div class="testi-info">
+              <div class="testi-name">Siti Rahayu</div>
+              <div class="testi-role">Investor Koleksi – Bandung</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NEWSLETTER / CTA SECTION -->
+  <section class="newsletter-section" id="contact">
+    <div class="newsletter-bg">
+      <div class="newsletter-glow"></div>
+    </div>
+    <div class="newsletter-container">
+      <div class="newsletter-icon">📧</div>
+      <h2 class="newsletter-title">Jangan Ketinggalan <span class="gradient-text">Pre-Order</span> Eksklusif!</h2>
+      <p class="newsletter-desc">Daftar newsletter dan dapatkan notifikasi pertama untuk rilis koleksi baru, flash sale,
+        dan penawaran member eksklusif.</p>
+      <form class="newsletter-form" id="newsletterForm">
+        <input type="email" class="newsletter-input" id="emailInput" placeholder="Masukkan email kamu..." required />
+        <button type="submit" class="btn btn-primary" id="subscribeBtn">
+          <span>Daftar Gratis</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </button>
+      </form>
+      <p class="newsletter-note">✓ Gratis · ✓ No Spam · ✓ Unsubscribe kapan saja</p>
+
+      <div class="social-links">
+        <a href="#" class="social-link" id="socialIG">
+          <span>📷</span> Instagram
+        </a>
+        <a href="#" class="social-link" id="socialWA">
+          <span>💬</span> WhatsApp
+        </a>
+        <a href="#" class="social-link" id="socialTT">
+          <span>🎵</span> TikTok
+        </a>
+        <a href="#" class="social-link" id="socialYT">
+          <span>▶️</span> YouTube
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <a href="#home" class="nav-logo">
+          <span class="logo-icon">⬡</span>
+          <span class="logo-text">DAI<span class="logo-accent">CAST</span></span>
+        </a>
+        <p class="footer-tagline">Premium Diecast Scale Models<br />Indonesia's #1 Collectibles Store</p>
+      </div>
+      <div class="footer-links-grid">
+        <div class="footer-col">
+          <h4 class="footer-col-title">Produk</h4>
+          <ul>
+            <li><a href="#products">Supercar</a></li>
+            <li><a href="#products">Muscle Car</a></li>
+            <li><a href="#products">JDM Collection</a></li>
+            <li><a href="#products">Limited Edition</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4 class="footer-col-title">Layanan</h4>
+          <ul>
+            <li><a href="#">Pre-Order</a></li>
+            <li><a href="#">Custom Order</a></li>
+            <li><a href="#">Trade-In</a></li>
+            <li><a href="#">Appraisal</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4 class="footer-col-title">Info</h4>
+          <ul>
+            <li><a href="#">Tentang Kami</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Kebijakan Privasi</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2024 DIECAST INDONESIA. All rights reserved. Dibuat dengan ❤️ untuk para kolektor Indonesia.</p>
+    </div>
+  </footer>
+
+  <!-- CART SIDEBAR -->
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <aside class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h2 class="cart-title">🛒 Keranjang Belanja</h2>
+      <button class="cart-close" id="cartClose" aria-label="Tutup keranjang">✕</button>
+    </div>
+    <div class="cart-body" id="cartBody">
+      <!-- items rendered by JS -->
+      <div class="cart-empty" id="cartEmpty">
+        <div class="cart-empty-icon">🛒</div>
+        <p>Keranjang kamu masih kosong</p>
+        <a href="#products" class="btn btn-primary" style="font-size:.9rem;padding:10px 20px" id="cartShopLink">Lihat
+          Koleksi</a>
+      </div>
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none">
+      <div class="cart-total-row">
+        <span>Total Belanja</span>
+        <span class="cart-total-price" id="cartTotal">Rp 0</span>
+      </div>
+      <button class="cart-clear-btn" id="cartClear">🗑 Kosongkan Keranjang</button>
+      <button class="btn btn-wa" id="checkoutWA">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+          <path
+            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+          <path
+            d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.118 1.535 5.845L.057 23.571a.75.75 0 00.949.891l5.902-1.545A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.75 9.75 0 110-19.5 9.75 9.75 0 010 19.5z" />
+        </svg>
+        Checkout via WhatsApp
+      </button>
+    </div>
+  </aside>
+
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast">
+    <span class="toast-icon">🛒</span>
+    <span class="toast-msg" id="toastMsg">Item ditambahkan ke keranjang!</span>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
