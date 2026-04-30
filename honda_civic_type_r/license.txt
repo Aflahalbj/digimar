@@ -1,0 +1,11 @@
+Model Information:
+* title:	2018 Honda Civic Type R Varis [FK8] VAHO-17
+* source:	https://sketchfab.com/3d-models/2018-honda-civic-type-r-varis-fk8-vaho-17-f2b768d4df884fd48e6ec863c9a51f9c
+* author:	Ddiaz Design (https://sketchfab.com/ddiaz-design)
+
+Model License:
+* license type:	CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+* requirements:	Author must be credited. No commercial use. Modified versions must have the same license.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "2018 Honda Civic Type R Varis [FK8] VAHO-17" (https://sketchfab.com/3d-models/2018-honda-civic-type-r-varis-fk8-vaho-17-f2b768d4df884fd48e6ec863c9a51f9c) by Ddiaz Design (https://sketchfab.com/ddiaz-design) licensed under CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)

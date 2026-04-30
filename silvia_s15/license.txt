@@ -1,0 +1,11 @@
+Model Information:
+* title:	2023 LB★SUPER SILHOUETTE S15 Silvia
+* source:	https://sketchfab.com/3d-models/2023-lbsuper-silhouette-s15-silvia-702d9937d68b4542929dfef59d1079cd
+* author:	Ddiaz Design (https://sketchfab.com/ddiaz-design)
+
+Model License:
+* license type:	CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)
+* requirements:	Author must be credited. No commercial use. Modified versions must have the same license.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "2023 LB★SUPER SILHOUETTE S15 Silvia" (https://sketchfab.com/3d-models/2023-lbsuper-silhouette-s15-silvia-702d9937d68b4542929dfef59d1079cd) by Ddiaz Design (https://sketchfab.com/ddiaz-design) licensed under CC-BY-NC-SA-4.0 (http://creativecommons.org/licenses/by-nc-sa/4.0/)

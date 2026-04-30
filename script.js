@@ -466,7 +466,7 @@ function aktifkan3D(container) {
   model.style.width = '100%';
   model.style.height = '100%';
   // model.style.marginTop = '50px';
-  model.style.transform = 'scale(1.3)';
+  model.style.transform = 'scale(1.3';
   img.style.display = 'none';
   container.appendChild(model);
 }
