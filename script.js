@@ -100,6 +100,13 @@ function renderCart() {
 
 // ─── CART ACTIONS ──────────────────────────────────
 function addToCart(id, name, price, emoji) {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    showToast('Silakan daftar/login dulu ya! 🔒', '⚠️');
+    setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+    return false;
+  }
+
   const existing = cart.find(i => i.id === id);
   if (existing) {
     existing.qty++;
@@ -109,6 +116,7 @@ function addToCart(id, name, price, emoji) {
   updateBadge();
   renderCart();
   showToast(`${name.slice(0, 28)} ditambahkan! 🎉`);
+  return true;
 }
 
 function changeQty(id, delta) {
@@ -186,7 +194,8 @@ function initCartButtons() {
       const price = parseInt(card.dataset.price || '0');
       const emoji = card.dataset.emoji || '🚗';
 
-      addToCart(id, name, price, emoji);
+      const added = addToCart(id, name, price, emoji);
+      if (!added) return;
 
       // Flash the main button if it's the main one (not overlay)
       const mainBtn = card.querySelector('.add-to-cart-main');
@@ -204,7 +213,7 @@ function initCartButtons() {
 
 // ─── NAVBAR SCROLL ─────────────────────────────────
 const navbar = document.getElementById('navbar');
-const navLinks = document.getElementById('navLinks');
+const navMenu = document.getElementById('navMenu');
 const hamburger = document.getElementById('hamburger');
 
 window.addEventListener('scroll', () => {
@@ -213,10 +222,10 @@ window.addEventListener('scroll', () => {
 });
 
 hamburger.addEventListener('click', () => {
-  navLinks.classList.toggle('open');
+  navMenu.classList.toggle('open');
 });
-document.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', () => navLinks.classList.remove('open'));
+document.querySelectorAll('.nav-link, .nav-cta').forEach(link => {
+  link.addEventListener('click', () => navMenu.classList.remove('open'));
 });
 
 function updateActiveLink() {
@@ -401,88 +410,124 @@ document.addEventListener('DOMContentLoaded', () => {
   const cartShopLink = document.getElementById('cartShopLink');
   if (cartShopLink) cartShopLink.addEventListener('click', closeCart);
 
-  // Init badge
-  updateBadge();
+  // Init badge (Gunakan originalUpdateBadge agar tidak memicu syncCart sebelum loadCart selesai)
+  if (typeof originalUpdateBadge === 'function') {
+    originalUpdateBadge();
+  }
   renderCart();
   updateActiveLink();
 });
 
+// ─── LRU CACHE 3D MODEL ────────────────────────────
+const MAX_ACTIVE_MODELS = 3;
+let active3DContainers = [];
+
 function aktifkan3D(container) {
   const modelSrc = container.getAttribute('data-model');
+  if (!modelSrc || modelSrc === '-') return;
+
   const img = container.querySelector('.product-img');
+  let model = container.querySelector('model-viewer');
 
-  if (container.querySelector('model-viewer')) return;
+  // Pindahkan container ini ke urutan terakhir (paling baru diakses)
+  active3DContainers = active3DContainers.filter(c => c !== container);
+  active3DContainers.push(container);
 
-  const model = document.createElement('model-viewer');
-  model.dataset.justLoaded = 'true';
+  if (model) {
+    // Model sudah ada di DOM, tinggal di-show
+    model.style.display = 'block';
+    img.style.display = 'none';
+  } else {
+    // Model belum ada, buat baru
+    model = document.createElement('model-viewer');
+    model.dataset.justLoaded = 'true';
 
-  // Buat Loading Screen
-  const loader = document.createElement('div');
-  loader.setAttribute('slot', 'progress-bar');
-  loader.className = 'model-loading-screen';
-  loader.innerHTML = `
-  <div class="model-loader"></div>
-    <span>Memuat model 3D...</span>
-  `;
-  model.appendChild(loader);
+    // Buat Loading Screen
+    const loader = document.createElement('div');
+    loader.setAttribute('slot', 'progress-bar');
+    loader.className = 'model-loading-screen';
+    loader.innerHTML = `
+    <div class="model-loader"></div>
+      <span>Memuat model 3D...</span>
+    `;
+    model.appendChild(loader);
 
-  // Jika terjadi error (misal file .gltf tidak ketemu)
-  model.addEventListener('error', (e) => {
-    console.error("Gagal muat model:", e);
-    loader.innerHTML = "<span>Gagal memuat model :(</span>";
-  });
+    // Jika terjadi error
+    model.addEventListener('error', (e) => {
+      console.error("Gagal muat model:", e);
+      loader.innerHTML = "<span>Gagal memuat model :(</span>";
+    });
 
-  // Set atribut dasar
-  model.src = modelSrc;
-  model.class = 'model';
-  model.alt = img.alt;
-  model.setAttribute('auto-rotate', 'true');
-  model.setAttribute('auto-rotate-delay', '0')
-  model.setAttribute('interaction-prompt', 'none')
-  model.setAttribute('camera-orbit', '250deg 75deg auto')
-  model.setAttribute('camera-controls', '');
-  model.setAttribute('bounds', 'tight');
-  model.setAttribute('rotation-per-second', '400deg');
+    // Set atribut dasar
+    model.src = modelSrc;
+    model.className = 'model';
+    model.alt = img.alt;
+    model.setAttribute('auto-rotate', 'true');
+    model.setAttribute('auto-rotate-delay', '0');
+    model.setAttribute('interaction-prompt', 'none');
+    model.setAttribute('camera-orbit', '250deg 75deg auto');
+    model.setAttribute('camera-controls', '');
+    model.setAttribute('bounds', 'tight');
+    model.setAttribute('rotation-per-second', '400deg');
 
-  model.addEventListener('load', () => {
-    console.log("Model selesai dimuat!");
-    loader.style.display = 'none';
-    setTimeout(() => {
-      model.dataset.justLoaded = 'false';
-    }, 500);
-    // Timer 1,5 detik baru mulai SEKARANG
-    setTimeout(() => {
-      model.rotationPerSecond = "50deg";
-    }, 500);
-  });
-  model.setAttribute('shadow-intensity', '2'); // Naikin biar bayangan tegas
-  model.setAttribute('shadow-softness', '1'); // Jangan terlalu blur biar kelihatan nempel
-  model.setAttribute('environment-image', 'neutral');
-  // WAJIB: Atribut ini yang bikin ada 'lantai' virtual
-  model.setAttribute('ar-placement', 'floor');
-  model.style.backgroundColor = '#0a0e18';
-  model.setAttribute('disable-tap', '');
-  model.setAttribute('onclick', 'toggleRotation(this)');
-  model.style.width = '100%';
-  model.style.height = '100%';
-  // model.style.marginTop = '50px';
-  model.style.transform = 'scale(1.3';
-  img.style.display = 'none';
-  container.appendChild(model);
+    model.addEventListener('load', () => {
+      console.log("Model selesai dimuat!");
+      loader.style.display = 'none';
+      setTimeout(() => {
+        model.dataset.justLoaded = 'false';
+      }, 500);
+      setTimeout(() => {
+        model.rotationPerSecond = "50deg";
+      }, 500);
+    });
+
+    model.setAttribute('shadow-intensity', '2');
+    model.setAttribute('shadow-softness', '1');
+    model.setAttribute('environment-image', 'neutral');
+    model.setAttribute('ar-placement', 'floor');
+    model.style.backgroundColor = '#0a0e18';
+    model.setAttribute('disable-tap', '');
+    model.setAttribute('onclick', 'toggleRotation(this)');
+    model.style.width = '100%';
+    model.style.height = '100%';
+    model.style.transform = 'scale(1.3)';
+
+    img.style.display = 'none';
+
+    // Masukkan model sbg elemen pertama agar Z-Index Vignette/Hint tetap di atas
+    container.prepend(model);
+  }
+
+  // Jalankan pembersihan LRU Cache jika melebihi batas
+  if (active3DContainers.length > MAX_ACTIVE_MODELS) {
+    const oldestContainer = active3DContainers.shift(); // Ambil dari depan (paling lama)
+    if (oldestContainer && oldestContainer !== container) {
+      const oldestModel = oldestContainer.querySelector('model-viewer');
+      if (oldestModel) {
+        oldestModel.remove(); // Hapus elemen 3D dari DOM untuk hemat RAM
+        console.log("LRU Cache: Menghapus 3D Model lama dari RAM");
+      }
+      const oldestImg = oldestContainer.querySelector('.product-img');
+      if (oldestImg) oldestImg.style.display = 'block';
+    }
+  }
 }
 
 function matikan3D(container) {
   const img = container.querySelector('.product-img');
   const model = container.querySelector('model-viewer');
 
-  // 3. Hapus model 3D total dari RAM
+  // Jangan di-remove, sembunyikan saja. Remove diurus oleh LRU Cache.
   if (model) {
-    model.remove();
+    model.style.display = 'none';
   }
 
-  // 4. Munculkan lagi gambar statis
-  img.style.display = 'block';
+  // Munculkan lagi gambar statis
+  if (img) {
+    img.style.display = 'block';
+  }
 }
+
 function toggleRotation(model) {
   if (model.dataset.justLoaded === 'true') {
     return;
@@ -496,3 +541,85 @@ function toggleRotation(model) {
     console.log("Auto-rotate: ON");
   }
 }
+
+// ─── AUTHENTICATION & CART SYNC ────────────────────
+const API_URL = 'http://localhost:5000/api';
+let isSyncing = false;
+
+async function syncCart() {
+  if (isSyncing) return;
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  try {
+    await fetch(`${API_URL}/cart/sync`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ cart })
+    });
+  } catch (err) { console.error('Gagal sinkronisasi keranjang', err); }
+}
+
+async function loadCart() {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_URL}/cart`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      isSyncing = true;
+      cart = await res.json();
+      originalUpdateBadge(); // Panggil fungsi asli tanpa trigger syncCart
+      renderCart();
+      isSyncing = false;
+    }
+  } catch (err) { console.error('Gagal memuat keranjang', err); }
+}
+
+function checkAuth() {
+  const token = localStorage.getItem('token');
+  const userStr = localStorage.getItem('user');
+  const authNavItem = document.getElementById('authNavItem');
+
+  if (token && userStr && authNavItem) {
+    const user = JSON.parse(userStr);
+    authNavItem.innerHTML = `
+      <a href="#" class="nav-cta" id="logoutBtn" style="background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);">
+        Logout
+      </a>
+    `;
+
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      cart = []; // Kosongkan keranjang saat logout
+      isSyncing = true;
+      originalUpdateBadge();
+      renderCart();
+      isSyncing = false;
+      checkAuth(); // Refresh UI
+      showToast('Berhasil logout', '👋');
+    });
+
+    loadCart();
+  } else if (authNavItem) {
+    authNavItem.innerHTML = `
+      <a href="login.html" class="nav-cta">Daftar</a>
+    `;
+  }
+}
+
+// Intercept updateBadge agar keranjang selalu tersinkronisasi ke server tiap kali ada perubahan
+const originalUpdateBadge = updateBadge;
+updateBadge = function () {
+  originalUpdateBadge();
+  syncCart();
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  checkAuth();
+});

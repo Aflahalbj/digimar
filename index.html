@@ -23,28 +23,35 @@
   <nav class="navbar" id="navbar">
     <div class="nav-container">
       <a href="#home" class="nav-logo">
-        <span class="logo-icon">⬡</span>
+        <span class="logo-icon"><i class="fa fa-explosion"></i></span>
         <span class="logo-text">DIECAST<span class="logo-accent"> INDONESIA</span></span>
       </a>
-      <ul class="nav-links" id="navLinks">
-        <li><a href="#home" class="nav-link active">Home</a></li>
-        <li><a href="#products" class="nav-link">Koleksi</a></li>
-        <li><a href="#features" class="nav-link">Keunggulan</a></li>
-        <li><a href="#testimonials" class="nav-link">Testimoni</a></li>
-        <li><a href="#contact" class="nav-link">Kontak</a></li>
-      </ul>
-      <a href="#products" class="nav-cta">Shop Now</a>
-      <button class="cart-toggle" id="cartToggle" aria-label="Keranjang Belanja">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0" />
-        </svg>
-        <span class="cart-badge" id="cartBadge">0</span>
-      </button>
+      <div class="nav-menu" id="navMenu">
+        <ul class="nav-links">
+          <li><a href="#home" class="nav-link active">Home</a></li>
+          <li><a href="#products" class="nav-link">Koleksi</a></li>
+          <li><a href="#features" class="nav-link">Keunggulan</a></li>
+          <li><a href="#testimonials" class="nav-link">Testimoni</a></li>
+          <li><a href="#contact" class="nav-link">Kontak</a></li>
+          <li id="authNavItem"><a href="login.html" class="nav-cta">Daftar</a></li>
+        </ul>
+      </div>
       <button class="hamburger" id="hamburger" aria-label="Toggle menu">
         <span></span><span></span><span></span>
       </button>
     </div>
+    <span></span><span></span><span></span>
+    </button>
+    </div>
   </nav>
+
+  <!-- FLOATING CART -->
+  <button class="cart-toggle floating-cart" id="cartToggle" aria-label="Keranjang Belanja">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0" />
+    </svg>
+    <span class="cart-badge" id="cartBadge">0</span>
+  </button>
 
   <!-- HERO SECTION -->
   <section class="hero" id="home">
@@ -300,7 +307,8 @@
         <div class="product-card" data-category="supercar" id="card5" data-name="Nissan Silvia S15 – 1:64 Scale"
           data-price="850000" data-emoji="🏎️">
           <div class="product-badge badge-hot">🔥 Hot</div>
-          <div class="product-img-wrap" onmouseenter="aktifkan3D(this)" onmouseleave="matikan3D(this)" data-model="silvia_s15/scene.gltf">
+          <div class="product-img-wrap" onmouseenter="aktifkan3D(this)" onmouseleave="matikan3D(this)"
+            data-model="silvia_s15/scene.gltf">
             <img src="assets/silvia_s15.png" class="product-img">
             <div class="model-hint">
               <i class="fas fa-cube"></i> <span>Klik/Hover untuk 3D</span>
@@ -326,7 +334,8 @@
         <div class="product-card" data-category="supercar" id="card6" data-name="Toyota GR Yaris – 1:64 Scale"
           data-price="850000" data-emoji="🏎️">
           <div class="product-badge badge-hot">🔥 Hot</div>
-          <div class="product-img-wrap" onmouseenter="aktifkan3D(this)" onmouseleave="matikan3D(this)" data-model="toyota_gr_yaris/scene.gltf">
+          <div class="product-img-wrap" onmouseenter="aktifkan3D(this)" onmouseleave="matikan3D(this)"
+            data-model="toyota_gr_yaris/scene.gltf">
             <img src="assets/toyota_gr_yaris.png" class="product-img">
             <div class="model-hint">
               <i class="fas fa-cube"></i> <span>Klik/Hover untuk 3D</span>
@@ -485,7 +494,7 @@
             </div>
           </div>
         </div>
-        <div class="testimonial-card featured-testi" id="testi2">
+        <div class="testimonial-card" id="testi2">
           <div class="testi-stars">★★★★★</div>
           <p class="testi-text">"Udah beli 15+ item dari DIECAST INDONESIA dan gak pernah kecewa sekalipun. Harganya
             fair,
@@ -520,7 +529,7 @@
       <div class="newsletter-glow"></div>
     </div>
     <div class="newsletter-container">
-      <div class="newsletter-icon">📧</div>
+      <div class="newsletter-icon"><i class="far fa-envelope"></i></div>
       <h2 class="newsletter-title">Jangan Ketinggalan <span class="gradient-text">Pre-Order</span> Eksklusif!</h2>
       <p class="newsletter-desc">Daftar newsletter dan dapatkan notifikasi pertama untuk rilis koleksi baru, flash sale,
         dan penawaran member eksklusif.</p>
@@ -537,16 +546,16 @@
 
       <div class="social-links">
         <a href="#" class="social-link" id="socialIG">
-          <span>📷</span> Instagram
+          <i class="fab fa-instagram"></i> Instagram
         </a>
         <a href="#" class="social-link" id="socialWA">
-          <span>💬</span> WhatsApp
+          <i class="fab fa-whatsapp"></i> WhatsApp
         </a>
         <a href="#" class="social-link" id="socialTT">
-          <span>🎵</span> TikTok
+          <i class="fab fa-tiktok"></i> TikTok
         </a>
         <a href="#" class="social-link" id="socialYT">
-          <span>▶️</span> YouTube
+          <i class="fab fa-youtube"></i> YouTube
         </a>
       </div>
     </div>
@@ -557,8 +566,8 @@
     <div class="footer-container">
       <div class="footer-brand">
         <a href="#home" class="nav-logo">
-          <span class="logo-icon">⬡</span>
-          <span class="logo-text">DAI<span class="logo-accent">CAST</span></span>
+          <span class="logo-icon"><i class="fas fa-explosion"></i></span>
+          <span class="logo-text">DIECAST<span class="logo-accent"> INDONESIA</span></span>
         </a>
         <p class="footer-tagline">Premium Diecast Scale Models<br />Indonesia's #1 Collectibles Store</p>
       </div>
