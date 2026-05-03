@@ -543,7 +543,7 @@ function toggleRotation(model) {
 }
 
 // ─── AUTHENTICATION & CART SYNC ────────────────────
-const API_URL = 'http://localhost:5000/api';
+const API_URL = '/api';
 let isSyncing = false;
 
 async function syncCart() {
