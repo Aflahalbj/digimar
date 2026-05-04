@@ -254,11 +254,23 @@ ul {
   min-height: 100vh;
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   padding: 120px 32px 80px;
   overflow: hidden;
-  max-width: 1280px;
-  margin: 0 auto;
-  gap: 60px;
+  width: 100%;
+  background-image: url(https://cdnb.artstation.com/p/assets/images/images/066/741/571/large/fg-renders-yellow-car-3.jpg?1693652900);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  text-align: left;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(5, 8, 16, 0.7), rgba(5, 8, 16, 0));
+  z-index: 0;
 }
 
 .hero-bg {
@@ -275,32 +287,32 @@ ul {
   opacity: 0.15;
 }
 
-.hero-glow-1 {
+/* .hero-glow-1 {
   width: 600px;
   height: 600px;
   background: var(--primary);
   top: -150px;
   left: -150px;
   animation: glowPulse 4s ease-in-out infinite;
-}
+} */
 
-.hero-glow-2 {
+/* .hero-glow-2 {
   width: 500px;
   height: 500px;
   background: var(--accent);
   top: 20%;
   right: -100px;
   animation: glowPulse 4s ease-in-out infinite 1s;
-}
+} */
 
-.hero-glow-3 {
+/* .hero-glow-3 {
   width: 400px;
   height: 400px;
   background: #8b5cf6;
   bottom: -100px;
   left: 30%;
   animation: glowPulse 4s ease-in-out infinite 2s;
-}
+} */
 
 @keyframes glowPulse {
 
@@ -326,11 +338,17 @@ ul {
 }
 
 .hero-content {
-  flex: 1;
-  max-width: 600px;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 800px;
+  /* margin: 0 auto; */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-.hero-badge {
+/* .hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -351,7 +369,7 @@ ul {
   background: var(--primary);
   border-radius: 50%;
   animation: blink 1.5s ease-in-out infinite;
-}
+} */
 
 @keyframes blink {
 
@@ -375,23 +393,23 @@ ul {
 }
 
 .hero-subtitle {
-  font-size: 1.1rem;
-  color: var(--text-secondary);
-  line-height: 1.7;
-  margin-bottom: 36px;
-  max-width: 520px;
+  text-align: left;
+  margin: 0 0 36px 0;
+  max-width: 600px;
 }
 
 .hero-buttons {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
+  justify-content: flex-start;
   margin-bottom: 56px;
 }
 
 .hero-stats {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 32px;
 }
 
@@ -922,6 +940,7 @@ ul {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  background: #030508;
 }
 
 .features-glow {
@@ -1016,10 +1035,10 @@ ul {
 .promo-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #1a0a00, #0d0520, #001a3a);
+  /* background: linear-gradient(135deg, #1a0a00, #0d0520, #001a3a); */
 }
 
-.promo-glow-1 {
+/* .promo-glow-1 {
   position: absolute;
   width: 400px;
   height: 400px;
@@ -1039,7 +1058,7 @@ ul {
   filter: blur(80px);
   bottom: -100px;
   right: -100px;
-}
+} */
 
 .promo-content {
   position: relative;
@@ -1140,7 +1159,7 @@ ul {
 
 /* ============ TESTIMONIALS ============ */
 .testimonials-section {
-  background: var(--bg-dark);
+  background: #030508;
 }
 
 .testimonials-grid {
@@ -1221,14 +1240,14 @@ ul {
 .newsletter-bg {
   position: absolute;
   inset: 0;
-  background: var(--bg-card);
+  /* background: var(--bg-card); */
 }
 
 .newsletter-glow {
   position: absolute;
   width: 600px;
   height: 300px;
-  background: radial-gradient(ellipse, rgba(249, 115, 22, 0.12), transparent 70%);
+  /* background: radial-gradient(ellipse, rgba(237, 233, 229, 0.12), transparent 80%); */
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
@@ -1446,10 +1465,20 @@ ul {
     flex-direction: column;
     text-align: center;
     padding: 140px 24px 80px;
+    justify-content: center;
+  }
+
+  .hero::before {
+    background: linear-gradient(to bottom, rgba(5, 8, 16, 0.8), rgba(5, 8, 16, 0.4));
   }
 
   .hero-content {
     max-width: 100%;
+    align-items: center;
+  }
+
+  .hero-subtitle {
+    text-align: center;
   }
 
   .hero-buttons {
@@ -1460,21 +1489,13 @@ ul {
     justify-content: center;
   }
 
-  .hero-image-wrap {
-    min-height: 320px;
-  }
-
-  .badge-top-right {
-    right: 0;
-  }
-
-  .badge-bottom-left {
-    left: 0;
-  }
-
   .footer-container {
     grid-template-columns: 1fr;
     gap: 40px;
+  }
+
+  .scroll-indicator {
+    margin-bottom: -40px;
   }
 }
 
