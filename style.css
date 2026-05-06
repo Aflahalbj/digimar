@@ -861,6 +861,14 @@ ul {
 
 .product-info {
   padding: 20px 24px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.product-info-left {
+  flex: 1;
+  padding-right: 16px;
 }
 
 .product-brand {
@@ -885,46 +893,46 @@ ul {
   align-items: center;
   gap: 6px;
   margin-bottom: 12px;
+  margin-top: -10px;
 }
 
-.stars {
+/* .stars {
   color: var(--gold);
   font-size: 0.9rem;
-}
+} */
 
-.rating-count {
+/* .rating-count {
   font-size: 0.8rem;
   color: var(--text-muted);
-}
+} */
 
 .product-price-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 10px;
 }
 
 .product-price {
   font-family: var(--font-display);
-  font-size: 1.3rem;
+  font-size: 0.9rem;
   font-weight: 700;
   color: var(--primary);
 }
 
 .product-price-old {
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   color: var(--text-muted);
   text-decoration: line-through;
 }
 
-.product-tag {
+/* .product-tag {
   font-size: 0.75rem;
   color: var(--text-muted);
   background: rgba(255, 255, 255, 0.04);
   padding: 4px 10px;
   border-radius: 6px;
   display: inline-block;
-}
+} */
 
 .products-cta {
   text-align: center;
@@ -1174,6 +1182,7 @@ ul {
   border-radius: var(--radius-lg);
   padding: 32px 28px;
   transition: var(--transition);
+  height: fit-content;
 }
 
 .testimonial-card:hover {
@@ -1208,10 +1217,10 @@ ul {
 }
 
 .testi-avatar {
-  width: 46px;
-  height: 46px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background: var(--gradient-main);
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1505,7 +1514,7 @@ ul {
     display: none;
     flex-direction: column;
     position: fixed;
-    top: 70px;
+    top: 65px;
     left: 0;
     right: 0;
     background: rgba(5, 8, 16, 0.97);
@@ -1590,12 +1599,12 @@ ul {
 
 /* ============ ADD TO CART MAIN BUTTON ============ */
 .add-to-cart-main {
-  width: 100%;
-  margin-top: 14px;
+  /* width: 100%; */
+  /* margin-top: 14px; */
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: #fff;
   border: none;
-  padding: 12px 16px;
+  padding: 10px 10px;
   border-radius: 12px;
   font-family: var(--font-main);
   font-weight: 700;
@@ -1604,8 +1613,8 @@ ul {
   transition: var(--transition);
   box-shadow: 0 4px 16px rgba(249, 115, 22, 0.25);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;
+  justify-content: flex-end;
   gap: 8px;
 }
 

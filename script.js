@@ -447,8 +447,7 @@ function aktifkan3D(container) {
     loader.setAttribute('slot', 'progress-bar');
     loader.className = 'model-loading-screen';
     loader.innerHTML = `
-    <div class="model-loader"></div>
-      <span>Memuat model 3D...</span>
+    <dotlottie-wc src="assets/Loading.lottie" style="width: 150px;height: 150px" autoplay loop></dotlottie-wc>
     `;
     model.appendChild(loader);
 
