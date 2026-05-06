@@ -203,7 +203,7 @@ function initCartButtons() {
         mainBtn.textContent = '✓ Ditambahkan!';
         mainBtn.classList.add('added');
         setTimeout(() => {
-          mainBtn.textContent = '🛒 Tambah ke Keranjang';
+          // mainBtn.textContent = '🛒 Tambah ke Keranjang';
           mainBtn.classList.remove('added');
         }, 1800);
       }

@@ -1105,9 +1105,9 @@ ul {
 
 .promo-title {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-size: 1.55rem;
   font-weight: 700;
-  line-height: 1.15;
+  /* line-height: 1.15; */
   margin-bottom: 16px;
 }
 
@@ -1116,7 +1116,7 @@ ul {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  font-size: 1.3em;
+  font-size: 1.15em;
 }
 
 .promo-desc {
@@ -1337,6 +1337,7 @@ ul {
   display: flex;
   align-items: center;
   gap: 8px;
+  fill: white;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--border);
   padding: 10px 20px;
@@ -1350,6 +1351,7 @@ ul {
   background: rgba(249, 115, 22, 0.1);
   border-color: var(--border-hover);
   color: var(--primary);
+  fill: var(--primary);
   transform: translateY(-2px);
 }
 
