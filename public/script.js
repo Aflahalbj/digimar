@@ -1,7 +1,8 @@
+
 /* ===================================================
-   DAICAST – Premium Diecast Collectibles
-   Main JavaScript – Cart + WhatsApp Checkout
-   =================================================== */
+DAICAST – Premium Diecast Collectibles
+Main JavaScript – Cart + WhatsApp Checkout
+=================================================== */
 
 // ─── WHATSAPP CONFIG ───────────────────────────────
 const WA_NUMBER = '6283138991304'; // ← Ganti dengan nomor WA toko
@@ -26,9 +27,17 @@ function showToast(msg, icon = '🛒') {
   clearTimeout(toast._timer);
   toast._timer = setTimeout(() => toast.classList.remove('show'), 3000);
 }
+function debounce(fn, delay) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
 
 // ─── CART BADGE ────────────────────────────────────
 function updateBadge() {
+  let _suppressSync = false;
   const badge = document.getElementById('cartBadge');
   if (!badge) return;
   const total = cart.reduce((sum, i) => sum + i.qty, 0);
@@ -36,6 +45,7 @@ function updateBadge() {
   badge.classList.remove('bump');
   void badge.offsetWidth; // reflow for re-trigger
   badge.classList.add('bump');
+  if (!_suppressSync) debouncedSync();
 }
 
 // ─── RENDER CART ITEMS ─────────────────────────────
@@ -200,10 +210,10 @@ function initCartButtons() {
       // Flash the main button if it's the main one (not overlay)
       const mainBtn = card.querySelector('.add-to-cart-main');
       if (mainBtn && btn === mainBtn) {
-        mainBtn.textContent = '✓ Ditambahkan!';
+        mainBtn.innerHTML = '✓ Ditambahkan!';
         mainBtn.classList.add('added');
         setTimeout(() => {
-          // mainBtn.textContent = '🛒 Tambah ke Keranjang';
+          mainBtn.innerHTML = '<dotlottie-wc src="https://lottie.host/f243d374-dbaf-40c9-aae7-8966d16f3d00/j6hjZ0mPui.lottie" style = "width: 25px;height: 25px" speed = "1.5" autoplay loop ></dotlottie-wc> ';
           mainBtn.classList.remove('added');
         }, 1800);
       }
@@ -230,19 +240,32 @@ document.querySelectorAll('.nav-link, .nav-cta').forEach(link => {
 
 function updateActiveLink() {
   const sections = ['home', 'products', 'features', 'testimonials', 'contact'];
-  const scrollPos = window.scrollY + 100;
+  const scrollPos = window.scrollY + 150; // Tambah offset agak besar supaya lebih responsif
+
   sections.forEach(id => {
     const section = document.getElementById(id);
-    const link = document.querySelector(`.nav-link[href="#${id}"]`);
-    if (!section || !link) return;
+    if (!section) return;
+
     const top = section.offsetTop;
     const bottom = top + section.offsetHeight;
+
     if (scrollPos >= top && scrollPos < bottom) {
+      // Hapus semua class active dulu
       document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-      link.classList.add('active');
+
+      // Kondisi khusus untuk ID 'products'
+      if (id === 'products') {
+        document.getElementById('link-product').classList.add('active');
+      } else {
+        // Untuk yang lain tetap cari berdasarkan href #id
+        const link = document.querySelector(`.nav-link[href="#${id}"]`) ||
+          document.querySelector(`.nav-link[href="index.html#${id}"]`);
+        if (link) link.classList.add('active');
+      }
     }
   });
 }
+
 
 // ─── ANIMATED COUNTER ──────────────────────────────
 function animateCounter(el, target) {
@@ -569,11 +592,11 @@ async function loadCart() {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     if (res.ok) {
-      isSyncing = true;
+      _suppressSync = true;
       cart = await res.json();
-      originalUpdateBadge(); // Panggil fungsi asli tanpa trigger syncCart
+      updateBadge();
       renderCart();
-      isSyncing = false;
+      _suppressSync = false;
     }
   } catch (err) { console.error('Gagal memuat keranjang', err); }
 }
@@ -596,10 +619,10 @@ function checkAuth() {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       cart = []; // Kosongkan keranjang saat logout
-      isSyncing = true;
-      originalUpdateBadge();
+      _suppressSync = true;
+      updateBadge();
       renderCart();
-      isSyncing = false;
+      _suppressSync = false;
       checkAuth(); // Refresh UI
       showToast('Berhasil logout', '👋');
     });
@@ -613,11 +636,7 @@ function checkAuth() {
 }
 
 // Intercept updateBadge agar keranjang selalu tersinkronisasi ke server tiap kali ada perubahan
-const originalUpdateBadge = updateBadge;
-updateBadge = function () {
-  originalUpdateBadge();
-  syncCart();
-};
+const debouncedSync = debounce(syncCart, 800);
 
 document.addEventListener('DOMContentLoaded', () => {
   checkAuth();

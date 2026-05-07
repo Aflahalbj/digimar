@@ -4,16 +4,82 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('./db');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
-app.use(cors());
+
+// ─── CORS ─────────────────────────────────────────────
+const allowedOrigins = [
+  'https://diecastindonesia.vercel.app',
+  'http://localhost:5000',
+  'http://localhost:3000',
+  'http://localhost:16512'
+];
+app.use(cors({
+  origin: (origin, callback) => {
+    // Izinkan request tanpa origin (misal: Postman, curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Tidak diizinkan oleh CORS'));
+    }
+  },
+  credentials: true,
+}));
+
 app.use(express.json());
+
+const path = require('path');
+
+app.use(express.static('public'));
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 menit
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Terlalu banyak percobaan. Coba lagi dalam 15 menit.' },
+});
+app.use('/api/auth', authLimiter);
+
+// ─── HELPER VALIDASI ──────────────────────────────────
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function validateRegister({ name, email, password }) {
+  if (!name || typeof name !== 'string' || name.trim().length < 2) {
+    return 'Nama minimal 2 karakter.';
+  }
+  if (name.trim().length > 100) {
+    return 'Nama terlalu panjang (maks 100 karakter).';
+  }
+  if (!email || !EMAIL_REGEX.test(email)) {
+    return 'Format email tidak valid.';
+  }
+  if (!password || password.length < 6) {
+    return 'Password minimal 6 karakter.';
+  }
+  if (password.length > 72) {
+    return 'Password terlalu panjang (maks 72 karakter).';
+  }
+  return null;
+}
+
+function validateLogin({ email, password }) {
+  if (!email || !EMAIL_REGEX.test(email)) {
+    return 'Format email tidak valid.';
+  }
+  if (!password || password.length < 1) {
+    return 'Password tidak boleh kosong.';
+  }
+  return null;
+}
+
 
 // ─── MIDDLEWARE AUTH ─────────────────────────────────
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-  
+
   if (!token) return res.status(401).json({ error: 'Akses ditolak. Token tidak ada.' });
 
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
@@ -27,9 +93,18 @@ const authenticateToken = (req, res, next) => {
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    
+
+    // Validasi input
+    const validationError = validateRegister({ name, email, password });
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
+    }
+
+    const trimmedName = name.trim();
+    const normalizedEmail = email.toLowerCase().trim();
+
     // Cek email
-    const [existing] = await db.execute('SELECT id FROM users WHERE email = ?', [email]);
+    const [existing] = await db.execute('SELECT id FROM users WHERE email = ?', [normalizedEmail]);
     if (existing.length > 0) {
       return res.status(400).json({ error: 'Email sudah terdaftar.' });
     }
@@ -37,7 +112,7 @@ app.post('/api/auth/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     await db.execute(
       'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-      [name, email, hashedPassword]
+      [trimmedName, normalizedEmail, hashedPassword]
     );
 
     res.status(201).json({ message: 'Registrasi berhasil!' });
@@ -50,8 +125,16 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    
-    const [users] = await db.execute('SELECT * FROM users WHERE email = ?', [email]);
+
+    // Validasi input
+    const validationError = validateLogin({ email, password });
+    if (validationError) {
+      return res.status(400).json({ error: validationError });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const [users] = await db.execute('SELECT * FROM users WHERE email = ?', [normalizedEmail]);
     if (users.length === 0) {
       return res.status(400).json({ error: 'Email atau password salah.' });
     }
@@ -95,22 +178,44 @@ app.post('/api/cart/sync', authenticateToken, async (req, res) => {
   const connection = await db.getConnection();
   try {
     const { cart } = req.body; // array of items
-    
+
+    // Validasi: cart harus array
+    if (!Array.isArray(cart)) {
+      return res.status(400).json({ error: 'Format cart tidak valid.' });
+    }
+
+    // Validasi: maks 50 item di cart
+    if (cart.length > 50) {
+      return res.status(400).json({ error: 'Terlalu banyak item di keranjang.' });
+    }
+
+    // Validasi tiap item
+    for (const item of cart) {
+      if (
+        !item.id || typeof item.id !== 'string' ||
+        !item.name || typeof item.name !== 'string' ||
+        typeof item.price !== 'number' || item.price < 0 ||
+        typeof item.qty !== 'number' || item.qty < 1 || item.qty > 999
+      ) {
+        return res.status(400).json({ error: 'Data item keranjang tidak valid.' });
+      }
+    }
+
     await connection.beginTransaction();
-    
+
     // Clear existing cart
     await connection.execute('DELETE FROM cart WHERE user_id = ?', [req.user.id]);
-    
+
     // Insert new cart items
-    if (cart && cart.length > 0) {
+    if (cart.length > 0) {
       for (const item of cart) {
         await connection.execute(
           'INSERT INTO cart (user_id, product_id, product_name, price, emoji, qty) VALUES (?, ?, ?, ?, ?, ?)',
-          [req.user.id, item.id, item.name, item.price, item.emoji, item.qty]
+          [req.user.id, item.id, item.name, item.price, item.emoji || '🚗', item.qty]
         );
       }
     }
-    
+
     await connection.commit();
     res.json({ message: 'Keranjang berhasil disinkronisasi.' });
   } catch (error) {

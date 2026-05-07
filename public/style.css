@@ -675,6 +675,7 @@ ul {
 
 .product-card {
   background: var(--bg-card);
+  height: fit-content;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   overflow: hidden;

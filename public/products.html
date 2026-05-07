@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Koleksi – DIECASTKU</title>
+    <meta name="description"
+        content="Temukan semua koleksi diecast premium DIECASTKU — Ferrari, Lamborghini, Nissan, Toyota, Honda dan banyak lagi." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.10/dist/dotlottie-wc.js" type="module"></script>
+
+    <style>
+        #nav-menu {
+            display: none;
+        }
+
+        #nav-menu.open {
+            display: block;
+        }
+
+        /* Atau style transisi lainnya */
+
+
+        #hamburger {
+            position: relative;
+            z-index: 9999;
+        }
+
+        /* ── PAGE HERO ─────────────────────────────────── */
+        .page-hero {
+            position: relative;
+            padding: 140px 32px 60px;
+            /* background: linear-gradient(180deg, rgba(249, 115, 22, 0.06) 0%, transparent 100%); */
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .page-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.05) 2px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 2px, transparent 1px);
+            background-size: 60px 60px;
+            pointer-events: none;
+        }
+
+        .page-hero-glow {
+            position: absolute;
+            width: 500px;
+            height: 300px;
+            /* background: radial-gradient(ellipse, rgba(249, 115, 22, 0.12), transparent 70%); */
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+
+        .page-hero-inner {
+            position: relative;
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .page-hero-left {}
+
+        .page-hero-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .page-hero-breadcrumb a {
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+
+        .page-hero-breadcrumb a:hover {
+            color: var(--primary);
+        }
+
+        .page-hero-breadcrumb span {
+            color: var(--primary);
+        }
+
+        .page-hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 12px;
+        }
+
+        .page-hero-desc {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 480px;
+        }
+
+        .page-hero-stats {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .page-stat {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 14px 20px;
+            text-align: center;
+            min-width: 90px;
+        }
+
+        .page-stat-num {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .page-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* ── LAYOUT ────────────────────────────────────── */
+        .shop-layout {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 40px 32px 100px;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        /* ── SIDEBAR FILTER ─────────────────────────────── */
+        .filter-sidebar {
+            position: relative;
+            /* top: 0px; */
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .filter-sidebar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-sidebar-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .filter-clear-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-family: var(--font-main);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            transition: opacity 0.2s;
+        }
+
+        .filter-clear-btn:hover {
+            opacity: 0.7;
+        }
+
+        .filter-group {}
+
+        .filter-group-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        .filter-checkbox:hover {
+            color: var(--text-primary);
+        }
+
+        .filter-checkbox input[type="checkbox"] {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 1.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 5px;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .filter-checkbox input[type="checkbox"]:checked {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .filter-checkbox input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .filter-count {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
+        /* Price Range */
+        .price-range-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .price-range-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .price-slider {
+            appearance: none;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary) 0%, var(--primary) var(--val, 100%), rgba(255, 255, 255, 0.1) var(--val, 100%));
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .price-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(249, 115, 22, 0.6);
+            transition: transform 0.2s;
+        }
+
+        .price-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .filter-divider {
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Scale filter pills */
+        .scale-pills {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .scale-pill {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font-main);
+        }
+
+        .scale-pill:hover,
+        .scale-pill.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 2px 10px rgba(249, 115, 22, 0.3);
+        }
+
+        /* ── MAIN CONTENT ───────────────────────────────── */
+        .shop-main {}
+
+        /* Search + Toolbar */
+        .shop-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .search-wrap {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-wrap i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        .search-input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            color: var(--text-primary);
+            padding: 12px 16px 12px 42px;
+            border-radius: var(--radius);
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+
+        .sort-select {
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            color: var(--text-primary);
+            padding: 12px 36px 12px 16px;
+            border-radius: var(--radius);
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            transition: var(--transition);
+        }
+
+        .sort-select:focus {
+            border-color: var(--primary);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 4px;
+        }
+
+        .view-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 7px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .view-btn.active {
+            background: rgba(249, 115, 22, 0.15);
+            color: var(--primary);
+        }
+
+        /* Active filters tags */
+        .active-filters {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            min-height: 0;
+        }
+
+        .active-filters:empty {
+            display: none;
+        }
+
+        .active-filters-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .filter-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(249, 115, 22, 0.1);
+            border: 1px solid rgba(249, 115, 22, 0.25);
+            color: var(--primary);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .filter-tag button {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 0;
+            font-size: 0.9rem;
+            line-height: 1;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .filter-tag button:hover {
+            opacity: 1;
+        }
+
+        /* Results info */
+        .results-info {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .results-info strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Products grid */
+        .products-grid-main {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 24px;
+        }
+
+        .products-grid-main.list-view {
+            grid-template-columns: 1fr;
+        }
+
+        .products-grid-main.list-view .product-card {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+        }
+
+        .products-grid-main.list-view .product-img-wrap {
+            height: 230px;
+            border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+        }
+
+        /* .products-grid-main.list-view .product-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 24px 28px;
+        } */
+
+        .products-grid-main.list-view .product-info-left {
+            padding-right: 0;
+            margin-bottom: 16px;
+        }
+
+        .products-grid-main.list-view .product-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* No results */
+        .no-results {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-muted);
+        }
+
+        .no-results-icon {
+            font-size: 3.5rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .no-results h3 {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .no-results p {
+            font-size: 0.9rem;
+        }
+
+        /* Load more */
+        .load-more-wrap {
+            text-align: center;
+            margin-top: 48px;
+        }
+
+        .load-more-btn {
+            background: transparent;
+            border: 1.5px solid var(--border);
+            color: var(--text-secondary);
+            padding: 14px 40px;
+            border-radius: 50px;
+            font-family: var(--font-main);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .load-more-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 20px rgba(249, 115, 22, 0.1);
+        }
+
+        /* Progress bar */
+        .load-progress {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .load-progress-bar-wrap {
+            width: 200px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 3px;
+            margin: 8px auto 0;
+            overflow: hidden;
+        }
+
+        .load-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .load-progress-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Mobile filter toggle */
+        .mobile-filter-toggle {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            border: 1.5px solid var(--border);
+            color: var(--text-primary);
+            padding: 11px 18px;
+            border-radius: var(--radius);
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .mobile-filter-toggle:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .filter-badge-count {
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Mobile drawer overlay */
+        .filter-drawer-overlay {
+            display: none;
+            top: 600px;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 900;
+        }
+
+        .filter-drawer-overlay.open {
+            display: block;
+        }
+
+        /* Fade-up animation for cards */
+        .product-card.fade-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .product-card.fade-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── RESPONSIVE ─────────────────────────────────── */
+        @media (max-width: 1024px) {
+            .shop-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-sidebar {
+                display: none;
+                position: fixed;
+                top: 70px;
+                left: 0;
+                bottom: 0;
+                z-index: 950;
+                width: 300px;
+                border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+                overflow-y: auto;
+                transform: translateX(-100%);
+                transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .filter-sidebar.open {
+                display: flex;
+                transform: translateX(0);
+            }
+
+            .products-grid-main.list-view .product-card {
+                grid-template-columns: 150px 1fr;
+            }
+
+            .products-grid-main.list-view .product-info {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                padding: 10px 14px;
+            }
+
+            .products-grid-main.list-view .product-name {
+                font-size: 12px;
+            }
+
+            .products-grid-main.list-view .product-price,
+            .product-price-old,
+            .product-brand,
+            .text-cart-btn {
+                font-size: 10px;
+            }
+
+            .products-grid-main.list-view .add-to-cart-main {
+                height: 30px;
+                padding: 5px;
+                align-items: center;
+            }
+
+            .products-grid-main.list-view .lottie-icon {
+                width: 15px !important;
+                height: 15px !important;
+            }
+
+            .products-grid-main.list-view .model-hint {
+                font-size: 9px;
+            }
+
+            .products-grid-main.list-view .product-badge {
+                font-size: 9px;
+                width: fit-content;
+                height: fit-content;
+                padding: 4px;
+            }
+
+            .products-grid-main.list-view .product-img-wrap {
+                height: auto;
+                border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+            }
+
+            .mobile-filter-toggle {
+                display: inline-flex;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page-hero {
+                padding: 120px 20px 40px;
+            }
+
+            .shop-layout {
+                padding: 24px 20px 80px;
+            }
+
+            .shop-toolbar {
+                gap: 8px;
+            }
+
+            .products-grid-main {
+                grid-template-columns: 1fr;
+            }
+
+            .page-hero-inner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar scrolled" id="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <span class="logo-icon"><i class="fa fa-explosion"></i></span>
+                <span class="logo-text">DIECAST<span class="logo-accent">KU</span></span>
+            </a>
+            <div class="nav-menu" id="navMenu">
+                <ul class="nav-links">
+                    <li><a href="index.html#home" class="nav-link">Home</a></li>
+                    <li><a href="products.html" class="nav-link active">Koleksi</a></li>
+                    <li><a href="index.html#features" class="nav-link">Keunggulan</a></li>
+                    <li><a href="index.html#testimonials" class="nav-link">Testimoni</a></li>
+                    <li><a href="index.html#contact" class="nav-link">Kontak</a></li>
+                    <li id="authNavItem"><a href="login.html" class="nav-cta">Daftar</a></li>
+                </ul>
+            </div>
+            <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- FLOATING CART -->
+    <button class="cart-toggle floating-cart" id="cartToggle" aria-label="Keranjang Belanja">
+        <dotlottie-wc src="https://lottie.host/f243d374-dbaf-40c9-aae7-8966d16f3d00/j6hjZ0mPui.lottie"
+            style="width: 30px;height: 30px" autoplay loop></dotlottie-wc>
+        <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+
+    <!-- PAGE HERO -->
+    <div class="page-hero">
+        <div class="page-hero-glow"></div>
+        <div class="page-hero-inner">
+            <div class="page-hero-left">
+                <div class="page-hero-breadcrumb">
+                    <a href="index.html">Home</a>
+                    <i class="fas fa-chevron-right" style="font-size:0.65rem"></i>
+                    <span>Koleksi</span>
+                </div>
+                <h1 class="page-hero-title">Semua <span class="gradient-text">Koleksi</span></h1>
+                <p class="page-hero-desc">Temukan diecast scale model impianmu dari ratusan pilihan premium.</p>
+            </div>
+            <div class="page-hero-stats">
+                <div class="page-stat">
+                    <div class="page-stat-num" id="statTotal">8</div>
+                    <div class="page-stat-label">Model</div>
+                </div>
+                <div class="page-stat">
+                    <div class="page-stat-num">5</div>
+                    <div class="page-stat-label">Brand</div>
+                </div>
+                <div class="page-stat">
+                    <div class="page-stat-num">1:64</div>
+                    <div class="page-stat-label">Scale</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER DRAWER OVERLAY -->
+    <div class="filter-drawer-overlay" id="filterOverlay"></div>
+
+    <!-- SHOP LAYOUT -->
+    <div class="shop-layout">
+
+        <!-- SIDEBAR FILTER -->
+        <aside class="filter-sidebar" id="filterSidebar">
+            <div class="filter-sidebar-header">
+                <span class="filter-sidebar-title">Filter</span>
+                <button class="filter-clear-btn" id="clearAllFilters">Reset semua</button>
+            </div>
+
+            <div class="filter-divider"></div>
+
+            <!-- Kategori -->
+            <div class="filter-group">
+                <div class="filter-group-label">Kategori</div>
+                <div class="filter-options">
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="category" value="supercar" id="catSupercar">
+                        <span>Supercar</span>
+                        <span class="filter-count">3</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="category" value="jdm" id="catJDM">
+                        <span>JDM</span>
+                        <span class="filter-count">4</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="category" value="muscle" id="catMuscle">
+                        <span>Muscle Car</span>
+                        <span class="filter-count">1</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="category" value="limited" id="catLimited">
+                        <span>Limited Edition</span>
+                        <span class="filter-count">2</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-divider"></div>
+
+            <!-- Brand -->
+            <div class="filter-group">
+                <div class="filter-group-label">Brand</div>
+                <div class="filter-options">
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="brand" value="ferrari">
+                        <span>Ferrari</span>
+                        <span class="filter-count">1</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="brand" value="lamborghini">
+                        <span>Lamborghini</span>
+                        <span class="filter-count">1</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="brand" value="nissan">
+                        <span>Nissan</span>
+                        <span class="filter-count">3</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="brand" value="honda">
+                        <span>Honda</span>
+                        <span class="filter-count">1</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="brand" value="toyota">
+                        <span>Toyota</span>
+                        <span class="filter-count">2</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-divider"></div>
+
+            <!-- Harga -->
+            <div class="filter-group">
+                <div class="filter-group-label">Harga Maksimum</div>
+                <div class="price-range-wrap">
+                    <div class="price-range-display">
+                        <span>Rp 0</span>
+                        <span id="priceDisplay">Rp 2.000.000</span>
+                    </div>
+                    <input type="range" class="price-slider" id="priceSlider" min="0" max="2000000" step="50000"
+                        value="2000000">
+                </div>
+            </div>
+
+            <div class="filter-divider"></div>
+
+            <!-- Scale -->
+            <div class="filter-group">
+                <div class="filter-group-label">Skala</div>
+                <div class="scale-pills">
+                    <button class="scale-pill active" data-scale="all">Semua</button>
+                    <button class="scale-pill" data-scale="1:18">1:18</button>
+                    <button class="scale-pill" data-scale="1:24">1:24</button>
+                    <button class="scale-pill" data-scale="1:43">1:43</button>
+                    <button class="scale-pill" data-scale="1:64">1:64</button>
+                </div>
+            </div>
+
+            <div class="filter-divider"></div>
+
+            <!-- Badge -->
+            <div class="filter-group">
+                <div class="filter-group-label">Status</div>
+                <div class="filter-options">
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="badge" value="hot">
+                        <span>🔥 Hot</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="badge" value="new">
+                        <span>✨ New</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="badge" value="limited">
+                        <span>⭐ Limited</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="badge" value="sale">
+                        <span>🏷️ Sale</span>
+                    </label>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="shop-main">
+
+            <!-- Toolbar -->
+            <div class="shop-toolbar">
+                <button class="mobile-filter-toggle" id="mobileFilterBtn">
+                    <i class="fas fa-sliders-h"></i>
+                    Filter
+                    <span class="filter-badge-count" id="filterBadgeCount" style="display:none">0</span>
+                </button>
+
+                <div class="search-wrap">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="search-input" id="searchInput"
+                        placeholder="Cari nama, brand, atau model...">
+                </div>
+
+                <select class="sort-select" id="sortSelect">
+                    <option value="default">Sortir</option>
+                    <option value="price-asc">Harga: Terendah</option>
+                    <option value="price-desc">Harga: Tertinggi</option>
+                    <option value="name-asc">Nama: A–Z</option>
+                    <option value="name-desc">Nama: Z–A</option>
+                    <option value="newest">Terbaru</option>
+                </select>
+
+                <div class="view-toggle">
+                    <button class="view-btn active" id="gridViewBtn" title="Grid View">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button class="view-btn" id="listViewBtn" title="List View">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active filters -->
+            <div class="active-filters" id="activeFilters"></div>
+
+            <!-- Results info -->
+            <div class="results-info" id="resultsInfo">
+                Menampilkan <strong id="resultCount">8</strong> produk
+            </div>
+
+            <!-- Products Grid -->
+            <div class="products-grid-main" id="productsGrid">
+                <!-- Rendered by JS -->
+            </div>
+
+            <!-- Load more -->
+            <div class="load-more-wrap" id="loadMoreWrap" style="display:none">
+                <button class="load-more-btn" id="loadMoreBtn">
+                    <i class="fas fa-chevron-down"></i>
+                    Tampilkan Lebih Banyak
+                </button>
+                <div class="load-progress">
+                    <div class="load-progress-text" id="progressText">Menampilkan 8 dari 8</div>
+                    <div class="load-progress-bar-wrap">
+                        <div class="load-progress-bar" id="progressBar" style="width:100%"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- CART SIDEBAR -->
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <aside class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h2 class="cart-title">🛒 Keranjang Belanja</h2>
+            <button class="cart-close" id="cartClose" aria-label="Tutup keranjang">✕</button>
+        </div>
+        <div class="cart-body" id="cartBody">
+            <div class="cart-empty" id="cartEmpty">
+                <div class="cart-empty-icon">🛒</div>
+                <p>Keranjang kamu masih kosong</p>
+                <a href="#" class="btn btn-primary" style="font-size:.9rem;padding:10px 20px" id="cartShopLink">Lihat
+                    Koleksi</a>
+            </div>
+        </div>
+        <div class="cart-footer" id="cartFooter" style="display:none">
+            <div class="cart-total-row">
+                <span>Total Belanja</span>
+                <span class="cart-total-price" id="cartTotal">Rp 0</span>
+            </div>
+            <button class="cart-clear-btn" id="cartClear">🗑 Kosongkan Keranjang</button>
+            <button class="btn btn-wa" id="checkoutWA">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                    <path
+                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                    <path
+                        d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.118 1.535 5.845L.057 23.571a.75.75 0 00.949.891l5.902-1.545A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.75 9.75 0 110-19.5 9.75 9.75 0 010 19.5z" />
+                </svg>
+                Checkout via WhatsApp
+            </button>
+        </div>
+    </aside>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">🛒</span>
+        <span class="toast-msg" id="toastMsg">Item ditambahkan ke keranjang!</span>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        /* ─────────────────────────────────────────────────────
+           PRODUCTS DATA
+        ───────────────────────────────────────────────────── */
+        const PRODUCTS = [
+            {
+                id: 'card1',
+                name: 'Ferrari 360 Modena – 1:64 Scale',
+                brand: 'Ferrari',
+                category: 'supercar',
+                price: 850000,
+                priceOld: 1200000,
+                emoji: '🏎️',
+                badge: 'hot',
+                badgeLabel: '🔥 Hot',
+                badgeClass: 'badge-hot',
+                img: 'assets/ferrari_static.png',
+                model: '1999_ferrari_360_modena/scene.gltf',
+                scale: '1:64',
+                tags: ['supercar', 'ferrari', 'italia'],
+                newest: false,
+            },
+            {
+                id: 'card2',
+                name: 'Nissan Z (RZ34) – 1:64 Scale',
+                brand: 'Nissan',
+                category: 'jdm',
+                price: 850000,
+                priceOld: 1200000,
+                emoji: '🏎️',
+                badge: 'hot',
+                badgeLabel: '🔥 Hot',
+                badgeClass: 'badge-hot',
+                img: 'assets/Nissan_Z_(RZ34).png',
+                model: 'nissan/scene.gltf',
+                scale: '1:64',
+                tags: ['jdm', 'nissan', 'sport'],
+                newest: false,
+            },
+            {
+                id: 'card3',
+                name: 'Honda Civic Type R – 1:64 Scale',
+                brand: 'Honda',
+                category: 'jdm',
+                price: 850000,
+                priceOld: 1200000,
+                emoji: '🏎️',
+                badge: 'new',
+                badgeLabel: '✨ New',
+                badgeClass: 'badge-new',
+                img: 'assets/Honda_civic.png',
+                model: 'honda_civic_type_r/scene.gltf',
+                scale: '1:64',
+                tags: ['jdm', 'honda', 'type r'],
+                newest: true,
+            },
+            {
+                id: 'card4',
+                name: 'Nissan Skyline GTR R34 – 1:64 Scale',
+                brand: 'Nissan',
+                category: 'jdm',
+                price: 950000,
+                priceOld: 1400000,
+                emoji: '🏎️',
+                badge: 'limited',
+                badgeLabel: '⭐ Limited',
+                badgeClass: 'badge-limited',
+                img: 'assets/nissan_skyline.png',
+                model: 'nissan_skyline_gtr_r34/scene.gltf',
+                scale: '1:64',
+                tags: ['jdm', 'nissan', 'gtr', 'r34'],
+                newest: false,
+            },
+            {
+                id: 'card5',
+                name: 'Nissan Silvia S15 – 1:64 Scale',
+                brand: 'Nissan',
+                category: 'jdm',
+                price: 750000,
+                priceOld: 1000000,
+                emoji: '🏎️',
+                badge: 'sale',
+                badgeLabel: '🏷️ Sale',
+                badgeClass: 'badge-sale',
+                img: 'assets/silvia_s15.png',
+                model: 'silvia_s15/scene.gltf',
+                scale: '1:64',
+                tags: ['jdm', 'nissan', 'silvia', 'drift'],
+                newest: false,
+            },
+            {
+                id: 'card6',
+                name: 'Toyota GR Yaris – 1:64 Scale',
+                brand: 'Toyota',
+                category: 'jdm',
+                price: 800000,
+                priceOld: 1100000,
+                emoji: '🏎️',
+                badge: 'new',
+                badgeLabel: '✨ New',
+                badgeClass: 'badge-new',
+                img: 'assets/toyota_gr_yaris.png',
+                model: 'toyota_gr_yaris/scene.gltf',
+                scale: '1:64',
+                tags: ['jdm', 'toyota', 'gr', 'rally'],
+                newest: true,
+            },
+            {
+                id: 'card7',
+                name: 'Toyota Supra MK IV – 1:64 Scale',
+                brand: 'Toyota',
+                category: 'jdm',
+                price: 900000,
+                priceOld: 1300000,
+                emoji: '🏎️',
+                badge: 'limited',
+                badgeLabel: '⭐ Limited',
+                badgeClass: 'badge-limited',
+                img: 'assets/toyota_gr_yaris.png',
+                model: 'toyota_supra_mk_iv/scene.gltf',
+                scale: '1:64',
+                tags: ['jdm', 'toyota', 'supra', 'mk4'],
+                newest: false,
+            },
+            {
+                id: 'card8',
+                name: 'Lamborghini Countach – 1:64 Scale',
+                brand: 'Lamborghini',
+                category: 'supercar',
+                price: 1200000,
+                priceOld: 1800000,
+                emoji: '🏎️',
+                badge: 'limited',
+                badgeLabel: '⭐ Limited',
+                badgeClass: 'badge-limited',
+                img: 'assets/ferrari_static.png',
+                model: 'lamborghini_countach/scene.gltf',
+                scale: '1:64',
+                tags: ['supercar', 'lamborghini', 'italia', 'classic'],
+                newest: false,
+            },
+        ];
+
+        /* ─────────────────────────────────────────────────────
+           STATE
+        ───────────────────────────────────────────────────── */
+        let state = {
+            search: '',
+            categories: [],
+            brands: [],
+            badges: [],
+            scale: 'all',
+            maxPrice: 2000000,
+            sort: 'default',
+            view: 'grid',
+            shown: 8,
+            perPage: 8,
+        };
+
+        /* ─────────────────────────────────────────────────────
+           HELPERS
+        ───────────────────────────────────────────────────── */
+        function fmt(n) {
+            return 'Rp ' + n.toLocaleString('id-ID');
+        }
+
+        function getFiltered() {
+            let list = [...PRODUCTS];
+
+            // Search
+            if (state.search) {
+                const q = state.search.toLowerCase();
+                list = list.filter(p =>
+                    p.name.toLowerCase().includes(q) ||
+                    p.brand.toLowerCase().includes(q) ||
+                    p.tags.some(t => t.includes(q))
+                );
+            }
+
+            // Category
+            if (state.categories.length) {
+                list = list.filter(p => state.categories.includes(p.category));
+            }
+
+            // Brand
+            if (state.brands.length) {
+                list = list.filter(p => state.brands.includes(p.brand.toLowerCase()));
+            }
+
+            // Badge
+            if (state.badges.length) {
+                list = list.filter(p => state.badges.includes(p.badge));
+            }
+
+            // Scale
+            if (state.scale !== 'all') {
+                list = list.filter(p => p.scale === state.scale);
+            }
+
+            // Price
+            list = list.filter(p => p.price <= state.maxPrice);
+
+            // Sort
+            switch (state.sort) {
+                case 'price-asc': list.sort((a, b) => a.price - b.price); break;
+                case 'price-desc': list.sort((a, b) => b.price - a.price); break;
+                case 'name-asc': list.sort((a, b) => a.name.localeCompare(b.name)); break;
+                case 'name-desc': list.sort((a, b) => b.name.localeCompare(a.name)); break;
+                case 'newest': list.sort((a, b) => b.newest - a.newest); break;
+            }
+
+            return list;
+        }
+
+        /* ─────────────────────────────────────────────────────
+           RENDER
+        ───────────────────────────────────────────────────── */
+        function renderCard(p, isListView) {
+            return `
+      <div class="product-card fade-up" data-category="${p.category}" id="${p.id}"
+        data-name="${p.name}" data-price="${p.price}" data-emoji="${p.emoji}"
+        data-brand="${p.brand.toLowerCase()}" data-badge="${p.badge}">
+        <div class="product-badge ${p.badgeClass}">${p.badgeLabel}</div>
+        <div class="product-img-wrap"
+          onmouseenter="aktifkan3D(this)" onmouseleave="matikan3D(this)"
+          data-model="${p.model}">
+          <img src="${p.img}" class="product-img" alt="${p.name}">
+          <div class="model-hint">
+            <i class="fas fa-cube"></i> <span>Klik/Hover untuk 3D</span>
+          </div>
+          <div class="vignette-overlay"></div>
+        </div>
+        <div class="product-info">
+          <div class="product-info-left">
+            <div class="product-brand">${p.brand}</div>
+            <h4 class="product-name">${p.name}</h4>
+            <div class="product-price-row">
+              <div class="product-price">${fmt(p.price)}</div>
+              <div class="product-price-old">${fmt(p.priceOld)}</div>
+            </div>
+          </div>
+          ${isListView ? `
+          <div class="product-actions">
+            <button class="add-to-cart-main add-to-cart-btn">
+              <dotlottie-wc src="https://lottie.host/f243d374-dbaf-40c9-aae7-8966d16f3d00/j6hjZ0mPui.lottie" class="lottie-icon"
+                style="width: 25px;height: 25px" speed="1.5" autoplay loop></dotlottie-wc> <span class="text-cart-btn">Tambah Ke Keranjang</span>
+            </button>
+          </div>` : `
+          <button class="add-to-cart-main add-to-cart-btn">
+            <dotlottie-wc src="https://lottie.host/f243d374-dbaf-40c9-aae7-8966d16f3d00/j6hjZ0mPui.lottie"
+              style="width:25px;height:25px" speed="1.5" autoplay loop></dotlottie-wc>
+          </button>`}
+        </div>
+      </div>
+    `;
+        }
+
+        function render() {
+            const grid = document.getElementById('productsGrid');
+            const filtered = getFiltered();
+            const total = filtered.length;
+            const shown = Math.min(state.shown, total);
+            const visible = filtered.slice(0, shown);
+            const isListView = state.view === 'list';
+
+            // Update grid class
+            grid.className = 'products-grid-main' + (isListView ? ' list-view' : '');
+
+            // Render cards
+            if (total === 0) {
+                grid.innerHTML = `
+        <div class="no-results">
+          <div class="no-results-icon">🔍</div>
+          <h3>Produk tidak ditemukan</h3>
+          <p>Coba ubah filter atau kata kunci pencarianmu</p>
+        </div>`;
+            } else {
+                grid.innerHTML = visible.map(p => renderCard(p, isListView)).join('');
+
+                // Animate cards in
+                requestAnimationFrame(() => {
+                    grid.querySelectorAll('.product-card.fade-up').forEach((el, i) => {
+                        setTimeout(() => el.classList.add('visible'), i * 60);
+                    });
+                });
+
+                // Re-init add-to-cart buttons
+                if (typeof initCartButtons === 'function') initCartButtons();
+            }
+
+            // Results info
+            document.getElementById('resultCount').textContent = total;
+
+            // Load more
+            const loadWrap = document.getElementById('loadMoreWrap');
+            if (total > shown) {
+                loadWrap.style.display = 'block';
+                document.getElementById('progressText').textContent = `Menampilkan ${shown} dari ${total}`;
+                document.getElementById('progressBar').style.width = `${(shown / total) * 100}%`;
+            } else {
+                loadWrap.style.display = 'none';
+            }
+
+            // Stat total
+            document.getElementById('statTotal').textContent = total;
+
+            renderActiveFilters();
+            updateFilterBadge();
+        }
+
+        /* ─────────────────────────────────────────────────────
+           ACTIVE FILTER TAGS
+        ───────────────────────────────────────────────────── */
+        const CATEGORY_LABELS = { supercar: 'Supercar', jdm: 'JDM', muscle: 'Muscle Car', limited: 'Limited Edition' };
+        const BADGE_LABELS = { hot: '🔥 Hot', new: '✨ New', limited: '⭐ Limited', sale: '🏷️ Sale' };
+
+        function renderActiveFilters() {
+            const wrap = document.getElementById('activeFilters');
+            const tags = [];
+
+            if (state.search) tags.push({ label: `"${state.search}"`, key: 'search' });
+            state.categories.forEach(c => tags.push({ label: CATEGORY_LABELS[c] || c, key: 'category', val: c }));
+            state.brands.forEach(b => tags.push({ label: b.charAt(0).toUpperCase() + b.slice(1), key: 'brand', val: b }));
+            state.badges.forEach(b => tags.push({ label: BADGE_LABELS[b] || b, key: 'badge', val: b }));
+            if (state.scale !== 'all') tags.push({ label: `Skala ${state.scale}`, key: 'scale' });
+            if (state.maxPrice < 2000000) tags.push({ label: `Maks ${fmt(state.maxPrice)}`, key: 'price' });
+
+            if (!tags.length) { wrap.innerHTML = ''; return; }
+
+            wrap.innerHTML = `<span class="active-filters-label">Filter aktif:</span>` +
+                tags.map(t => `
+        <span class="filter-tag">
+          ${t.label}
+          <button onclick="removeFilter('${t.key}','${t.val || ''}')" aria-label="Hapus filter">×</button>
+        </span>`).join('');
+        }
+
+        function removeFilter(key, val) {
+            if (key === 'search') { state.search = ''; document.getElementById('searchInput').value = ''; }
+            if (key === 'category') state.categories = state.categories.filter(c => c !== val);
+            if (key === 'brand') state.brands = state.brands.filter(b => b !== val);
+            if (key === 'badge') state.badges = state.badges.filter(b => b !== val);
+            if (key === 'scale') { state.scale = 'all'; document.querySelectorAll('.scale-pill').forEach(p => p.classList.toggle('active', p.dataset.scale === 'all')); }
+            if (key === 'price') { state.maxPrice = 2000000; document.getElementById('priceSlider').value = 2000000; updatePriceDisplay(); }
+            syncCheckboxes();
+            state.shown = state.perPage;
+            render();
+        }
+
+        function syncCheckboxes() {
+            document.querySelectorAll('input[name="category"]').forEach(cb => {
+                cb.checked = state.categories.includes(cb.value);
+            });
+            document.querySelectorAll('input[name="brand"]').forEach(cb => {
+                cb.checked = state.brands.includes(cb.value);
+            });
+            document.querySelectorAll('input[name="badge"]').forEach(cb => {
+                cb.checked = state.badges.includes(cb.value);
+            });
+        }
+
+        function updateFilterBadge() {
+            const count = state.categories.length + state.brands.length + state.badges.length +
+                (state.scale !== 'all' ? 1 : 0) + (state.maxPrice < 2000000 ? 1 : 0);
+            const badge = document.getElementById('filterBadgeCount');
+            badge.textContent = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+
+        /* ─────────────────────────────────────────────────────
+           PRICE DISPLAY
+        ───────────────────────────────────────────────────── */
+        function updatePriceDisplay() {
+            const val = parseInt(document.getElementById('priceSlider').value);
+            document.getElementById('priceDisplay').textContent = fmt(val);
+            const pct = ((val / 2000000) * 100).toFixed(1);
+            document.getElementById('priceSlider').style.setProperty('--val', pct + '%');
+        }
+
+        /* ─────────────────────────────────────────────────────
+           EVENT LISTENERS
+        ───────────────────────────────────────────────────── */
+        // Debounce for search
+        let searchTimer;
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Search
+            document.getElementById('searchInput').addEventListener('input', e => {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(() => {
+                    state.search = e.target.value.trim();
+                    state.shown = state.perPage;
+                    render();
+                }, 300);
+            });
+
+            // Sort
+            document.getElementById('sortSelect').addEventListener('change', e => {
+                state.sort = e.target.value;
+                state.shown = state.perPage;
+                render();
+            });
+
+            // Category checkboxes
+            document.querySelectorAll('input[name="category"]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    if (cb.checked) state.categories.push(cb.value);
+                    else state.categories = state.categories.filter(c => c !== cb.value);
+                    state.shown = state.perPage;
+                    render();
+                });
+            });
+
+            // Brand checkboxes
+            document.querySelectorAll('input[name="brand"]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    if (cb.checked) state.brands.push(cb.value);
+                    else state.brands = state.brands.filter(b => b !== cb.value);
+                    state.shown = state.perPage;
+                    render();
+                });
+            });
+
+            // Badge checkboxes
+            document.querySelectorAll('input[name="badge"]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    if (cb.checked) state.badges.push(cb.value);
+                    else state.badges = state.badges.filter(b => b !== cb.value);
+                    state.shown = state.perPage;
+                    render();
+                });
+            });
+
+            // Scale pills
+            document.querySelectorAll('.scale-pill').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.scale-pill').forEach(p => p.classList.remove('active'));
+                    btn.classList.add('active');
+                    state.scale = btn.dataset.scale;
+                    state.shown = state.perPage;
+                    render();
+                });
+            });
+
+            // Price slider
+            const slider = document.getElementById('priceSlider');
+            slider.addEventListener('input', () => {
+                state.maxPrice = parseInt(slider.value);
+                updatePriceDisplay();
+                state.shown = state.perPage;
+                render();
+            });
+            updatePriceDisplay();
+
+            // Clear all filters
+            document.getElementById('clearAllFilters').addEventListener('click', () => {
+                state.search = ''; state.categories = []; state.brands = [];
+                state.badges = []; state.scale = 'all'; state.maxPrice = 2000000;
+                document.getElementById('searchInput').value = '';
+                document.getElementById('priceSlider').value = 2000000;
+                updatePriceDisplay();
+                document.querySelectorAll('.scale-pill').forEach(p => p.classList.toggle('active', p.dataset.scale === 'all'));
+                syncCheckboxes();
+                state.shown = state.perPage;
+                render();
+            });
+
+            // Grid / List view toggle
+            document.getElementById('gridViewBtn').addEventListener('click', () => {
+                state.view = 'grid';
+                document.getElementById('gridViewBtn').classList.add('active');
+                document.getElementById('listViewBtn').classList.remove('active');
+                render();
+            });
+            document.getElementById('listViewBtn').addEventListener('click', () => {
+                state.view = 'list';
+                document.getElementById('listViewBtn').classList.add('active');
+                document.getElementById('gridViewBtn').classList.remove('active');
+                render();
+            });
+
+            // Load more
+            document.getElementById('loadMoreBtn').addEventListener('click', () => {
+                state.shown += state.perPage;
+                render();
+                // Scroll to newly added cards
+                const cards = document.querySelectorAll('.product-card');
+                if (cards.length) cards[cards.length - state.perPage]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+
+            // Mobile filter
+            const sidebar = document.getElementById('filterSidebar');
+            const overlay = document.getElementById('filterOverlay');
+            document.getElementById('mobileFilterBtn').addEventListener('click', () => {
+                sidebar.classList.add('open');
+                overlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            });
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('open');
+                document.body.style.overflow = '';
+            });
+
+            // Navbar
+            const navMenu = document.getElementById('nav-menu');
+            document.getElementById('hamburger').addEventListener('click', () => navMenu.classList.toggle('open'));
+            document.querySelectorAll('.nav-link, .nav-cta').forEach(l => l.addEventListener('click', () => navMenu.classList.remove('open')));
+
+            // Initial render
+            render();
+        });
+    </script>
+</body>
+
+</html>

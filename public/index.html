@@ -30,7 +30,7 @@
       <div class="nav-menu" id="navMenu">
         <ul class="nav-links">
           <li><a href="#home" class="nav-link active">Home</a></li>
-          <li><a href="#products" class="nav-link">Koleksi</a></li>
+          <li><a href="products.html" id="link-product" class="nav-link">Koleksi</a></li>
           <li><a href="#features" class="nav-link">Keunggulan</a></li>
           <li><a href="#testimonials" class="nav-link">Testimoni</a></li>
           <li><a href="#contact" class="nav-link">Kontak</a></li>
@@ -112,18 +112,18 @@
         <img class="marquee-img" src="assets/matchbox.png" alt="Matchbox" style="height: 30px; margin-top: 3px;">
         <img class="marquee-img" src="assets/minigt.png" alt="Mini GT" style="height: 20px; margin-top: 8px;">
         <img class="marquee-img" src="assets/images.png" alt="Hotwheels" style="height: 20px; margin-top: 8px;">
-        <img class="marquee-img" src="assets/burago.png" alt="Burago" style="height: 30px; margin-top: 3px;">
-        <img class="marquee-img" src="assets/tomica.png" alt="Tomica" style="height: 15px; margin-top: 10px;">
         <img class="marquee-img" src="assets/matchbox.png" alt="Matchbox" style="height: 30px; margin-top: 3px;">
         <img class="marquee-img" src="assets/minigt.png" alt="Mini GT" style="height: 20px; margin-top: 8px;">
         <img class="marquee-img" src="assets/images.png" alt="Hotwheels" style="height: 20px; margin-top: 8px;">
-        <img class="marquee-img" src="assets/burago.png" alt="Burago" style="height: 30px; margin-top: 3px;">
-        <img class="marquee-img" src="assets/tomica.png" alt="Tomica" style="height: 15px; margin-top: 10px;">
         <img class="marquee-img" src="assets/matchbox.png" alt="Matchbox" style="height: 30px; margin-top: 3px;">
         <img class="marquee-img" src="assets/minigt.png" alt="Mini GT" style="height: 20px; margin-top: 8px;">
         <img class="marquee-img" src="assets/images.png" alt="Hotwheels" style="height: 20px; margin-top: 8px;">
-        <img class="marquee-img" src="assets/burago.png" alt="Burago" style="height: 30px; margin-top: 3px;">
-        <img class="marquee-img" src="assets/tomica.png" alt="Tomica" style="height: 15px; margin-top: 10px;">
+        <img class="marquee-img" src="assets/matchbox.png" alt="Matchbox" style="height: 30px; margin-top: 3px;">
+        <img class="marquee-img" src="assets/minigt.png" alt="Mini GT" style="height: 20px; margin-top: 8px;">
+        <img class="marquee-img" src="assets/images.png" alt="Hotwheels" style="height: 20px; margin-top: 8px;">
+        <img class="marquee-img" src="assets/matchbox.png" alt="Matchbox" style="height: 30px; margin-top: 3px;">
+        <img class="marquee-img" src="assets/minigt.png" alt="Mini GT" style="height: 20px; margin-top: 8px;">
+        <img class="marquee-img" src="assets/images.png" alt="Hotwheels" style="height: 20px; margin-top: 8px;">
         <!-- <span>⭐ Kyosho</span>
         <span>🎯 Minichamps</span>
         <span>🚀 AUTOart</span>
@@ -144,19 +144,19 @@
     <div class="section-container">
       <div class="section-header">
         <div class="section-tag">Koleksi Terfeatured</div>
-        <h2 class="section-title">Pilih <span class="gradient-text">Favoritmu</span></h2>
+        <h2 class="section-title">Pilihan <span class="gradient-text">Teratas</span></h2>
         <p class="section-desc">Dari supercar mewah hingga muscle car klasik — semua ada di DIECASTKU dengan
           kualitas
           premium dan harga terjangkau.</p>
       </div>
 
-      <div class="product-filter">
+      <!-- <div class="product-filter">
         <button class="filter-btn active" data-filter="all" id="filterAll">Semua</button>
         <button class="filter-btn" data-filter="supercar" id="filterSupercar">Supercar</button>
         <button class="filter-btn" data-filter="muscle" id="filterMuscle">Muscle Car</button>
         <button class="filter-btn" data-filter="jdm" id="filterJDM">JDM</button>
         <button class="filter-btn" data-filter="limited" id="filterLimited">Limited Edition</button>
-      </div>
+      </div> -->
 
       <div class="products-grid">
         <div class="product-card" data-category="supercar" id="card1" data-name="Ferrari 360 Modena – 1:64 Scale"
@@ -263,91 +263,10 @@
             </button>
           </div>
         </div>
-
-        <div class="product-card" data-category="supercar" id="card4" data-name="Nissan Skyline GTR R34 – 1:64 Scale"
-          data-price="850000" data-emoji="🏎️">
-          <div class="product-badge badge-hot">🔥 Hot</div>
-          <div class="product-img-wrap" onmouseenter="aktifkan3D(this)" onmouseleave="matikan3D(this)"
-            data-model="nissan_skyline_gtr_r34/scene.gltf">
-            <img src="assets/nissan_skyline.png" class="product-img">
-            <div class="model-hint">
-              <i class="fas fa-cube"></i> <span>Klik/Hover untuk 3D</span>
-            </div>
-            <div class="vignette-overlay"></div>
-          </div>
-          <div class="product-info">
-            <div class="product-info-left">
-              <div class="product-brand">Nissan</div>
-              <h3 class="product-name">Nissan Skyline GTR R34 – 1:64 Scale</h3>
-              <div class="product-price-row">
-                <div class="product-price">Rp 850.000</div>
-                <div class="product-price-old">Rp 1.200.000</div>
-              </div>
-            </div>
-            <button class="add-to-cart-main add-to-cart-btn">
-              <dotlottie-wc src="https://lottie.host/f243d374-dbaf-40c9-aae7-8966d16f3d00/j6hjZ0mPui.lottie"
-                style="width: 25px;height: 25px" speed="1.5" autoplay loop></dotlottie-wc>
-            </button>
-          </div>
-        </div>
-
-        <div class="product-card" data-category="supercar" id="card5" data-name="Nissan Silvia S15 – 1:64 Scale"
-          data-price="850000" data-emoji="🏎️">
-          <div class="product-badge badge-hot">🔥 Hot</div>
-          <div class="product-img-wrap" onmouseenter="aktifkan3D(this)" onmouseleave="matikan3D(this)"
-            data-model="silvia_s15/scene.gltf">
-            <img src="assets/silvia_s15.png" class="product-img">
-            <div class="model-hint">
-              <i class="fas fa-cube"></i> <span>Klik/Hover untuk 3D</span>
-            </div>
-            <div class="vignette-overlay"></div>
-          </div>
-          <div class="product-info">
-            <div class="product-info-left">
-              <div class="product-brand">Nissan</div>
-              <h3 class="product-name">Nissan Silvia S15 – 1:64 Scale</h3>
-              <div class="product-price-row">
-                <div class="product-price">Rp 850.000</div>
-                <div class="product-price-old">Rp 1.200.000</div>
-              </div>
-            </div>
-            <button class="add-to-cart-main add-to-cart-btn">
-              <dotlottie-wc src="https://lottie.host/f243d374-dbaf-40c9-aae7-8966d16f3d00/j6hjZ0mPui.lottie"
-                style="width: 25px;height: 25px" speed="1.5" autoplay loop></dotlottie-wc>
-            </button>
-          </div>
-        </div>
-
-        <div class="product-card" data-category="supercar" id="card6" data-name="Toyota GR Yaris – 1:64 Scale"
-          data-price="850000" data-emoji="🏎️">
-          <div class="product-badge badge-hot">🔥 Hot</div>
-          <div class="product-img-wrap" onmouseenter="aktifkan3D(this)" onmouseleave="matikan3D(this)"
-            data-model="toyota_gr_yaris/scene.gltf">
-            <img src="assets/toyota_gr_yaris.png" class="product-img">
-            <div class="model-hint">
-              <i class="fas fa-cube"></i> <span>Klik/Hover untuk 3D</span>
-            </div>
-            <div class="vignette-overlay"></div>
-          </div>
-          <div class="product-info">
-            <div class="product-info-left">
-              <div class="product-brand">Toyota</div>
-              <h3 class="product-name">Toyota GR Yaris – 1:64 Scale</h3>
-              <div class="product-price-row">
-                <div class="product-price">Rp 850.000</div>
-                <div class="product-price-old">Rp 1.200.000</div>
-              </div>
-            </div>
-            <button class="add-to-cart-main add-to-cart-btn">
-              <dotlottie-wc src="https://lottie.host/f243d374-dbaf-40c9-aae7-8966d16f3d00/j6hjZ0mPui.lottie"
-                style="width: 25px;height: 25px" speed="1.5" autoplay loop></dotlottie-wc>
-            </button>
-          </div>
-        </div>
       </div>
 
       <div class="products-cta">
-        <a href="#contact" class="btn btn-primary" id="viewMoreBtn">
+        <a href="products.html" class="btn btn-primary" id="viewMoreBtn">
           <span>Lihat Semua Koleksi</span>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M5 12h14M12 5l7 7-7 7" />
