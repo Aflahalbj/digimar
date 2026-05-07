@@ -10,7 +10,7 @@ const app = express();
 
 // ─── CORS ─────────────────────────────────────────────
 const allowedOrigins = [
-  'https://aflahalbj.github.io/digimiar, 
+  'https://aflahalbj.github.io/digimiar', 
   'https://diecastindonesia.vercel.app',
   'http://localhost:5000',
   'http://localhost:3000',
