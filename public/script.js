@@ -469,6 +469,7 @@ function aktifkan3D(container) {
     const loader = document.createElement('div');
     loader.setAttribute('slot', 'progress-bar');
     loader.className = 'model-loading-screen';
+    loader.style.transform = 'scale(1.9)';
     loader.innerHTML = `
     <dotlottie-wc src="assets/Loading.lottie" style="width: 150px;height: 150px" autoplay loop></dotlottie-wc>
     `;
@@ -484,6 +485,7 @@ function aktifkan3D(container) {
     model.src = modelSrc;
     model.className = 'model';
     model.alt = img.alt;
+    model.style.touchAction = 'pan-y';
     model.setAttribute('auto-rotate', 'true');
     model.setAttribute('auto-rotate-delay', '0');
     model.setAttribute('interaction-prompt', 'none');
@@ -497,11 +499,21 @@ function aktifkan3D(container) {
       loader.style.display = 'none';
       setTimeout(() => {
         model.dataset.justLoaded = 'false';
-      }, 500);
-      setTimeout(() => {
         model.rotationPerSecond = "50deg";
       }, 500);
+
+      setTimeout(() => {
+        model.style.transform = 'scale(1.3)';
+        model.style.transition = 'transform 1s ease-in-out';
+      }, 100);
     });
+
+    model.addEventListener('wheel', (event) => {
+      // Membiarkan scroll halaman jika tidak menekan tombol Ctrl (opsional)
+      if (!event.ctrlKey) {
+        event.stopPropagation();
+      }
+    }, { capture: true });
 
     model.setAttribute('shadow-intensity', '2');
     model.setAttribute('shadow-softness', '1');
@@ -512,7 +524,7 @@ function aktifkan3D(container) {
     model.setAttribute('onclick', 'toggleRotation(this)');
     model.style.width = '100%';
     model.style.height = '100%';
-    model.style.transform = 'scale(1.3)';
+    model.style.transform = 'scale(0.7)';
 
     img.style.display = 'none';
 
