@@ -1,4 +1,6 @@
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
 const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
@@ -13,9 +15,8 @@ const pool = mysql.createPool({
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 10000,
-  // WAJIB: Tambahkan SSL agar Aiven mau menerima koneksi
   ssl: {
-    rejectUnauthorized: false
+    ca: fs.readFileSync(path.join(__dirname, 'ca.pem'))
   }
 });
 pool.on('error', (err) => {
