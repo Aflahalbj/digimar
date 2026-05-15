@@ -564,7 +564,7 @@ function aktifkan3D(container) {
     const loader = document.createElement('div');
     loader.setAttribute('slot', 'progress-bar');
     loader.className = 'model-loading-screen';
-    // loader.style.transform = 'scale(1.9)';
+    loader.style.transform = 'scale(1.9)';
     loader.innerHTML = `
     <dotlottie-wc src="assets/Loading.lottie" style="width: 150px;height: 150px" autoplay loop></dotlottie-wc>
     `;
@@ -597,10 +597,10 @@ function aktifkan3D(container) {
         model.rotationPerSecond = "50deg";
       }, 500);
 
-      // setTimeout(() => {
-      //   model.style.transform = 'scale(1.3)';
-      //   model.style.transition = 'transform 0.5s ease-in-out';
-      // }, 0);
+      setTimeout(() => {
+        model.style.transform = 'scale(1.3)';
+        model.style.transition = 'transform 0.5s ease-in-out';
+      }, 0);
     });
 
     model.addEventListener('wheel', (event) => {
@@ -619,7 +619,7 @@ function aktifkan3D(container) {
     model.setAttribute('onclick', 'toggleRotation(this)');
     model.style.width = '100%';
     model.style.height = '100%';
-    model.style.transform = 'scale(1.3)';
+    model.style.transform = 'scale(0.7)';
 
     img.style.display = 'none';
 
