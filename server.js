@@ -10,7 +10,6 @@ const app = express();
 
 // ─── CORS ─────────────────────────────────────────────
 const allowedOrigins = [
-  'https://aflahalbj.github.io/digimiar', 
   'https://diecastindonesia.vercel.app',
   'http://localhost:5000',
   'http://localhost:3000',
@@ -225,6 +224,260 @@ app.post('/api/cart/sync', authenticateToken, async (req, res) => {
     res.status(500).json({ error: 'Gagal sinkronisasi keranjang.' });
   } finally {
     connection.release();
+  }
+});
+
+// ─── ADMIN MIDDLEWARE ─────────────────────────────────
+const authenticateAdmin = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Akses ditolak.' });
+  jwt.verify(token, process.env.JWT_SECRET, (err, admin) => {
+    if (err || !admin.isAdmin) return res.status(403).json({ error: 'Bukan admin.' });
+    req.admin = admin;
+    next();
+  });
+};
+
+// ─── ADMIN AUTH ───────────────────────────────────────
+app.post('/api/admin/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ error: 'Email dan password wajib diisi.' });
+    const [admins] = await db.execute('SELECT * FROM admins WHERE email = ?', [email.toLowerCase().trim()]);
+    if (!admins.length) return res.status(400).json({ error: 'Email atau password salah.' });
+    const admin = admins[0];
+    const valid = await bcrypt.compare(password, admin.password);
+    if (!valid) return res.status(400).json({ error: 'Email atau password salah.' });
+    const token = jwt.sign({ id: admin.id, name: admin.name, email: admin.email, isAdmin: true }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    res.json({ token, admin: { id: admin.id, name: admin.name, email: admin.email } });
+  } catch (e) {
+    res.status(500).json({ error: 'Terjadi kesalahan server.', details: e.message });
+  }
+});
+
+// Buat admin pertama — hapus route ini setelah dipakai di production!
+app.post('/api/admin/setup', async (req, res) => {
+  try {
+    const { name, email, password, setupKey } = req.body;
+    if (setupKey !== process.env.ADMIN_SETUP_KEY) return res.status(403).json({ error: 'Setup key salah.' });
+    const [existing] = await db.execute('SELECT id FROM admins WHERE email = ?', [email]);
+    if (existing.length) return res.status(400).json({ error: 'Admin sudah ada.' });
+    const hashed = await bcrypt.hash(password, 10);
+    await db.execute('INSERT INTO admins (name, email, password) VALUES (?, ?, ?)', [name, email, hashed]);
+    res.json({ message: 'Admin berhasil dibuat.' });
+  } catch (e) {
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+});
+
+// ─── PRODUCTS API (publik – baca) ─────────────────────
+app.get('/api/products', async (req, res) => {
+  try {
+    const [rows] = await db.execute('SELECT * FROM products WHERE is_active = 1 ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal mengambil produk.' });
+  }
+});
+
+app.get('/api/products/:id', async (req, res) => {
+  try {
+    const [rows] = await db.execute('SELECT * FROM products WHERE id = ?', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Produk tidak ditemukan.' });
+    res.json(rows[0]);
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal mengambil produk.' });
+  }
+});
+
+// ─── PRODUCTS CRUD (admin only) ───────────────────────
+app.post('/api/admin/products', authenticateAdmin, async (req, res) => {
+  try {
+    const { id, name, brand, category, price, price_old, emoji, badge, img, model_path, scale, stock } = req.body;
+    if (!id || !name || !brand || !category || !price) return res.status(400).json({ error: 'Field wajib: id, name, brand, category, price.' });
+    await db.execute(
+      'INSERT INTO products (id, name, brand, category, price, price_old, emoji, badge, img, model_path, scale, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [id, name, brand, category, price, price_old || null, emoji || '🏎️', badge || 'new', img || 'assets/ferrari_static.png', req.body.model_3d || model_path || null, scale || '1:64', stock ?? 99]
+    );
+    res.status(201).json({ message: 'Produk berhasil ditambahkan.' });
+  } catch (e) {
+    if (e.code === 'ER_DUP_ENTRY') return res.status(400).json({ error: 'ID produk sudah dipakai.' });
+    res.status(500).json({ error: 'Gagal menambah produk.' });
+  }
+});
+
+app.put('/api/admin/products/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const { name, brand, category, price, price_old, emoji, badge, img, model_path, scale, stock, is_active } = req.body;
+    await db.execute(
+      'UPDATE products SET name=?, brand=?, category=?, price=?, price_old=?, emoji=?, badge=?, img=?, model_path=?, scale=?, stock=?, is_active=?, updated_at=NOW() WHERE id=?',
+      [name, brand, category, price, price_old || null, emoji || '🏎️', badge || 'new', img || 'assets/ferrari_static.png', req.body.model_3d || model_path || null, scale || '1:64', stock ?? 99, is_active ?? 1, req.params.id]
+    );
+    res.json({ message: 'Produk berhasil diupdate.' });
+  } catch (e) {
+    console.error("PUT PRODUCT ERROR:", e);
+    res.status(500).json({ error: 'Gagal mengupdate produk.' });
+  }
+});
+
+app.delete('/api/admin/products/:id', authenticateAdmin, async (req, res) => {
+  try {
+    await db.execute('DELETE FROM products WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Produk berhasil dihapus.' });
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal menghapus produk.' });
+  }
+});
+
+app.patch('/api/admin/products/:id/toggle', authenticateAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.execute('SELECT is_active FROM products WHERE id = ?', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Produk tidak ditemukan.' });
+    const currentStatus = rows[0].is_active;
+    const newStatus = currentStatus ? 0 : 1;
+    await db.execute('UPDATE products SET is_active = ?, updated_at = NOW() WHERE id = ?', [newStatus, req.params.id]);
+    res.json({ message: 'Status produk berhasil diubah.', is_active: newStatus });
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal mengubah status produk.' });
+  }
+});
+
+// ─── ANALYTICS COLLECT ────────────────────────────────
+app.post('/api/analytics/pageview', async (req, res) => {
+  try {
+    const { session_id, page, referrer } = req.body;
+    if (!session_id) return res.status(400).json({ error: 'session_id wajib.' });
+    const ua = req.headers['user-agent'] || '';
+    await db.execute(
+      'INSERT INTO sessions (id, pages_count) VALUES (?, 1) ON DUPLICATE KEY UPDATE pages_count = pages_count + 1',
+      [session_id]
+    );
+    await db.execute(
+      'INSERT INTO page_views (session_id, page, referrer, user_agent) VALUES (?, ?, ?, ?)',
+      [session_id, page || '/', referrer || null, ua.substring(0, 500)]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal mencatat pageview.' });
+  }
+});
+
+app.post('/api/analytics/session-end', async (req, res) => {
+  try {
+    const { session_id, duration_sec } = req.body;
+    if (!session_id) return res.status(400).json({ error: 'session_id wajib.' });
+    await db.execute(
+      'UPDATE sessions SET duration_sec = ?, ended_at = NOW() WHERE id = ?',
+      [Math.round(duration_sec) || 0, session_id]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal mencatat durasi.' });
+  }
+});
+
+app.post('/api/analytics/product-event', async (req, res) => {
+  try {
+    const { product_id, event_type, session_id, duration_ms } = req.body;
+    if (!product_id || !event_type) return res.status(400).json({ error: 'product_id dan event_type wajib.' });
+    await db.execute(
+      'INSERT INTO product_events (product_id, event_type, session_id, duration_ms) VALUES (?, ?, ?, ?)',
+      [product_id, event_type, session_id || null, duration_ms || null]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal mencatat event.' });
+  }
+});
+
+// ─── ANALYTICS DASHBOARD ─────────────────────────────
+app.get('/api/admin/analytics/overview', authenticateAdmin, async (req, res) => {
+  try {
+    const days = parseInt(req.query.range) || 7;
+    const [[{ total_visitors }]] = await db.execute(
+      'SELECT COUNT(DISTINCT session_id) as total_visitors FROM page_views WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)', [days]);
+    const [[{ total_pageviews }]] = await db.execute(
+      'SELECT COUNT(*) as total_pageviews FROM page_views WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)', [days]);
+    const [[{ avg_duration }]] = await db.execute(
+      'SELECT ROUND(AVG(duration_sec)) as avg_duration FROM sessions WHERE duration_sec IS NOT NULL AND created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)', [days]);
+    const [[{ total_products }]] = await db.execute('SELECT COUNT(*) as total_products FROM products WHERE is_active = 1');
+    const [[{ total_users }]] = await db.execute('SELECT COUNT(*) as total_users FROM users');
+    const [[{ cart_adds_today }]] = await db.execute(
+      `SELECT COUNT(*) as cart_adds_today FROM product_events WHERE event_type = 'cart_add' AND DATE(created_at) = CURDATE()`);
+    res.json({ total_visitors, total_pageviews, avg_duration: avg_duration || 0, total_products, total_users, cart_adds_today });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal mengambil overview.' });
+  }
+});
+
+app.get('/api/admin/analytics/visits', authenticateAdmin, async (req, res) => {
+  try {
+    const days = parseInt(req.query.range) || 7;
+    const [daily] = await db.execute(
+      `SELECT DATE(created_at) as date, COUNT(DISTINCT session_id) as visitors, COUNT(*) as pageviews
+       FROM page_views WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)
+       GROUP BY DATE(created_at) ORDER BY date ASC`, [days]);
+    res.json(daily);
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal mengambil visits.' });
+  }
+});
+
+app.get('/api/admin/analytics/top-cart', authenticateAdmin, async (req, res) => {
+  try {
+    const [topCart] = await db.execute(
+      `SELECT c.product_id, p.name as product_name, p.img, p.brand, SUM(c.qty) as cart_adds
+       FROM cart c LEFT JOIN products p ON c.product_id = p.id
+       GROUP BY c.product_id ORDER BY cart_adds DESC LIMIT 8`);
+    res.json(topCart);
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal mengambil top cart.' });
+  }
+});
+
+app.get('/api/admin/analytics/top-hover', authenticateAdmin, async (req, res) => {
+  try {
+    const [topHoverDuration] = await db.execute(
+      `SELECT pe.product_id, p.name as product_name, p.img, p.brand, ROUND(AVG(pe.duration_ms / 1000)) as avg_hover_seconds, ROUND(SUM(pe.duration_ms / 1000)) as total_hover_seconds
+       FROM product_events pe LEFT JOIN products p ON pe.product_id = p.id
+       WHERE pe.event_type = 'hover_end' AND pe.duration_ms IS NOT NULL
+       GROUP BY pe.product_id ORDER BY avg_hover_seconds DESC LIMIT 8`);
+    res.json(topHoverDuration);
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal mengambil top hover.' });
+  }
+});
+
+app.get('/api/admin/analytics/pages', authenticateAdmin, async (req, res) => {
+  try {
+    const [pages] = await db.execute(
+      `SELECT pv.page, COUNT(*) as views, COUNT(DISTINCT pv.session_id) as unique_views, ROUND(AVG(s.duration_sec)) as avg_duration
+       FROM page_views pv LEFT JOIN sessions s ON pv.session_id = s.id
+       GROUP BY pv.page ORDER BY views DESC LIMIT 10`);
+    res.json(pages);
+  } catch (e) {
+    console.error("Pages route error:", e);
+    res.status(500).json({ error: 'Gagal mengambil halaman.', details: e.message });
+  }
+});
+
+app.get('/api/admin/products', authenticateAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.execute('SELECT * FROM products ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal mengambil produk.' });
+  }
+});
+
+app.get('/api/admin/users', authenticateAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.execute('SELECT id, name, email, created_at FROM users ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal mengambil users.' });
   }
 });
 

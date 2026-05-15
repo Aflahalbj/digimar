@@ -7,13 +7,17 @@
     <title>Koleksi – DIECASTKU</title>
     <meta name="description"
         content="Temukan semua koleksi diecast premium DIECASTKU — Ferrari, Lamborghini, Nissan, Toyota, Honda dan banyak lagi." />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/favicon/site.webmanifest">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap"
         rel="stylesheet" />
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
     <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.10/dist/dotlottie-wc.js" type="module"></script>
 
@@ -1082,144 +1086,7 @@
         /* ─────────────────────────────────────────────────────
            PRODUCTS DATA
         ───────────────────────────────────────────────────── */
-        const PRODUCTS = [
-            {
-                id: 'card1',
-                name: 'Ferrari 360 Modena – 1:64 Scale',
-                brand: 'Ferrari',
-                category: 'supercar',
-                price: 850000,
-                priceOld: 1200000,
-                emoji: '🏎️',
-                badge: 'hot',
-                badgeLabel: '🔥 Hot',
-                badgeClass: 'badge-hot',
-                img: 'assets/ferrari_static.png',
-                model: '1999_ferrari_360_modena/scene.gltf',
-                scale: '1:64',
-                tags: ['supercar', 'ferrari', 'italia'],
-                newest: false,
-            },
-            {
-                id: 'card2',
-                name: 'Nissan Z (RZ34) – 1:64 Scale',
-                brand: 'Nissan',
-                category: 'jdm',
-                price: 850000,
-                priceOld: 1200000,
-                emoji: '🏎️',
-                badge: 'hot',
-                badgeLabel: '🔥 Hot',
-                badgeClass: 'badge-hot',
-                img: 'assets/Nissan_Z_(RZ34).png',
-                model: 'nissan/scene.gltf',
-                scale: '1:64',
-                tags: ['jdm', 'nissan', 'sport'],
-                newest: false,
-            },
-            {
-                id: 'card3',
-                name: 'Honda Civic Type R – 1:64 Scale',
-                brand: 'Honda',
-                category: 'jdm',
-                price: 850000,
-                priceOld: 1200000,
-                emoji: '🏎️',
-                badge: 'new',
-                badgeLabel: '✨ New',
-                badgeClass: 'badge-new',
-                img: 'assets/Honda_civic.png',
-                model: 'honda_civic_type_r/scene.gltf',
-                scale: '1:64',
-                tags: ['jdm', 'honda', 'type r'],
-                newest: true,
-            },
-            {
-                id: 'card4',
-                name: 'Nissan Skyline GTR R34 – 1:64 Scale',
-                brand: 'Nissan',
-                category: 'jdm',
-                price: 950000,
-                priceOld: 1400000,
-                emoji: '🏎️',
-                badge: 'limited',
-                badgeLabel: '⭐ Limited',
-                badgeClass: 'badge-limited',
-                img: 'assets/nissan_skyline.png',
-                model: 'nissan_skyline_gtr_r34/scene.gltf',
-                scale: '1:64',
-                tags: ['jdm', 'nissan', 'gtr', 'r34'],
-                newest: false,
-            },
-            {
-                id: 'card5',
-                name: 'Nissan Silvia S15 – 1:64 Scale',
-                brand: 'Nissan',
-                category: 'jdm',
-                price: 750000,
-                priceOld: 1000000,
-                emoji: '🏎️',
-                badge: 'sale',
-                badgeLabel: '🏷️ Sale',
-                badgeClass: 'badge-sale',
-                img: 'assets/silvia_s15.png',
-                model: 'silvia_s15/scene.gltf',
-                scale: '1:64',
-                tags: ['jdm', 'nissan', 'silvia', 'drift'],
-                newest: false,
-            },
-            {
-                id: 'card6',
-                name: 'Toyota GR Yaris – 1:64 Scale',
-                brand: 'Toyota',
-                category: 'jdm',
-                price: 800000,
-                priceOld: 1100000,
-                emoji: '🏎️',
-                badge: 'new',
-                badgeLabel: '✨ New',
-                badgeClass: 'badge-new',
-                img: 'assets/toyota_gr_yaris.png',
-                model: 'toyota_gr_yaris/scene.gltf',
-                scale: '1:64',
-                tags: ['jdm', 'toyota', 'gr', 'rally'],
-                newest: true,
-            },
-            {
-                id: 'card7',
-                name: 'Toyota Supra MK IV – 1:64 Scale',
-                brand: 'Toyota',
-                category: 'jdm',
-                price: 900000,
-                priceOld: 1300000,
-                emoji: '🏎️',
-                badge: 'limited',
-                badgeLabel: '⭐ Limited',
-                badgeClass: 'badge-limited',
-                img: 'assets/toyota_gr_yaris.png',
-                model: 'toyota_supra_mk_iv/scene.gltf',
-                scale: '1:64',
-                tags: ['jdm', 'toyota', 'supra', 'mk4'],
-                newest: false,
-            },
-            {
-                id: 'card8',
-                name: 'Lamborghini Countach – 1:64 Scale',
-                brand: 'Lamborghini',
-                category: 'supercar',
-                price: 1200000,
-                priceOld: 1800000,
-                emoji: '🏎️',
-                badge: 'limited',
-                badgeLabel: '⭐ Limited',
-                badgeClass: 'badge-limited',
-                img: 'assets/ferrari_static.png',
-                model: 'lamborghini_countach/scene.gltf',
-                scale: '1:64',
-                tags: ['supercar', 'lamborghini', 'italia', 'classic'],
-                newest: false,
-            },
-        ];
+        let PRODUCTS = [];
 
         /* ─────────────────────────────────────────────────────
            STATE
@@ -1392,7 +1259,7 @@
            ACTIVE FILTER TAGS
         ───────────────────────────────────────────────────── */
         const CATEGORY_LABELS = { supercar: 'Supercar', jdm: 'JDM', muscle: 'Muscle Car', limited: 'Limited Edition' };
-        const BADGE_LABELS = { hot: '🔥 Hot', new: '✨ New', limited: '⭐ Limited', sale: '🏷️ Sale' };
+        const BADGE_LABELS = { hot: '🔥 Hot', new: '✨ New', limited: '⭐ Limited', sale: '🏷️ Sale', popular: '🏆 Popular' };
 
         function renderActiveFilters() {
             const wrap = document.getElementById('activeFilters');
@@ -1463,7 +1330,36 @@
         // Debounce for search
         let searchTimer;
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load products dynamically
+            try {
+                const response = await fetch('/api/products');
+                if (response.ok) {
+                    const dbProducts = await response.json();
+                    PRODUCTS = dbProducts.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        brand: p.brand || 'Unbranded',
+                        category: p.category || 'all',
+                        price: p.price,
+                        priceOld: p.price_old,
+                        emoji: p.emoji || '🏎️',
+                        badge: p.badge ? p.badge.toLowerCase() : '',
+                        badgeLabel: p.badge ? (p.badge.toLowerCase() === 'hot' ? '🔥 Hot' : (p.badge.toLowerCase() === 'sale' ? '🏷️ Sale' : (p.badge.toLowerCase() === 'new' ? '✨ New' : (p.badge.toLowerCase() === 'popular' ? '🏆 Popular' : '⭐ Limited')))) : '',
+                        badgeClass: p.badge ? (p.badge.toLowerCase() === 'hot' ? 'badge-hot' : (p.badge.toLowerCase() === 'sale' ? 'badge-sale' : (p.badge.toLowerCase() === 'new' ? 'badge-new' : (p.badge.toLowerCase() === 'popular' ? 'badge-popular' : 'badge-limited')))) : '',
+                        img: p.img || 'assets/ferrari_static.png',
+                        model: p.model_path || '',
+                        scale: p.scale || '1:64',
+                        tags: [p.category || 'all', (p.brand || '').toLowerCase()],
+                        newest: p.badge && p.badge.toLowerCase() === 'new'
+                    }));
+                }
+            } catch (e) {
+                console.error("Error fetching products:", e);
+            }
+
+            // Sync with sidebar DOM
+            syncCheckboxes();
 
             // Search
             document.getElementById('searchInput').addEventListener('input', e => {

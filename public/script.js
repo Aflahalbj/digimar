@@ -409,6 +409,101 @@ if (window.innerWidth > 768) {
   });
 }
 
+// ─── FETCH & RENDER PRODUCTS ──────────────────────────
+async function fetchAndRenderProducts() {
+  const grid = document.querySelector('.products-grid');
+  if (!grid) return; // Skip jika tidak ada grid produk di halaman ini
+
+  try {
+    const response = await fetch('/api/products');
+    if (!response.ok) throw new Error('Gagal memuat produk');
+    const products = await response.json();
+
+    grid.innerHTML = '';
+
+    if (products.length === 0) {
+      grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #a1a1aa;">Belum ada produk yang aktif.</p>';
+      return;
+    }
+
+    // Limit to 3 products as requested for index.html
+    const top3Products = products.slice(0, 3);
+
+    top3Products.forEach((p, index) => {
+      const formatRp = (num) => 'Rp ' + parseInt(num).toLocaleString('id-ID');
+
+      let badgeHTML = '';
+      if (p.badge) {
+        let badgeClass = 'badge-sale';
+        let badgeIcon = '🏷️ ';
+        let badgeLabel = p.badge;
+
+        const b = p.badge.toLowerCase();
+        if (b === 'hot') { badgeClass = 'badge-hot'; badgeIcon = '🔥 '; }
+        else if (b === 'new') { badgeClass = 'badge-new'; badgeIcon = '✨ '; }
+        else if (b === 'limited') { badgeClass = 'badge-limited'; badgeIcon = '⭐ '; }
+        else if (b === 'popular') { badgeClass = 'badge-popular'; badgeIcon = '🏆 '; }
+
+        badgeHTML = `<div class="product-badge ${badgeClass}">${badgeIcon}${badgeLabel}</div>`;
+      }
+
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.dataset.category = p.category || 'all';
+      card.id = p.id;
+      card.dataset.name = p.name;
+      card.dataset.price = p.price;
+      card.dataset.emoji = p.emoji || '🏎️';
+
+      card.innerHTML = `
+        ${badgeHTML}
+        <div class="product-img-wrap" 
+          ${p.model_path ? `onmouseenter="aktifkan3D(this)" onmouseleave="matikan3D(this)" data-model="${p.model_path}"` : ''}>
+          <img src="${p.img || 'assets/ferrari_static.png'}" class="product-img">
+          ${p.model_path ? `
+          <div class="model-hint">
+            <i class="fas fa-cube"></i> <span>Klik/Hover untuk 3D</span>
+          </div>` : ''}
+          <div class="vignette-overlay"></div>
+        </div>
+        <div class="product-info">
+          <div class="product-info-left">
+            <div class="product-brand">${p.brand || 'Unbranded'}</div>
+            <h3 class="product-name">${p.name}</h3>
+            <div class="product-price-row">
+              <div class="product-price">${formatRp(p.price)}</div>
+              ${p.price_old ? `<div class="product-price-old">${formatRp(p.price_old)}</div>` : ''}
+            </div>
+          </div>
+          <button class="add-to-cart-main add-to-cart-btn">
+            <dotlottie-wc src="https://lottie.host/f243d374-dbaf-40c9-aae7-8966d16f3d00/j6hjZ0mPui.lottie"
+              style="width: 25px;height: 25px" speed="1.5" autoplay loop></dotlottie-wc>
+          </button>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    });
+
+    initCartButtons();
+
+    // Re-attach observer for animation
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in-view');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.product-card').forEach(el => observer.observe(el));
+
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #ef4444;">Gagal memuat produk. Coba lagi nanti.</p>';
+  }
+}
+
 // ─── INIT ──────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   // Hero entrance animation
@@ -419,8 +514,8 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => { el.style.opacity = '1'; el.style.transform = 'translateY(0)'; }, 80);
   });
 
-  // Init add-to-cart buttons
-  initCartButtons();
+  // Fetch & render products dynamically
+  fetchAndRenderProducts();
 
   // Cart sidebar controls
   document.getElementById('cartToggle').addEventListener('click', openCart);
@@ -504,8 +599,8 @@ function aktifkan3D(container) {
 
       setTimeout(() => {
         model.style.transform = 'scale(1.3)';
-        model.style.transition = 'transform 1s ease-in-out';
-      }, 100);
+        model.style.transition = 'transform 0.5s ease-in-out';
+      }, 0);
     });
 
     model.addEventListener('wheel', (event) => {
@@ -653,3 +748,105 @@ const debouncedSync = debounce(syncCart, 800);
 document.addEventListener('DOMContentLoaded', () => {
   checkAuth();
 });
+
+/* ─────────────────────────────────────────────────────
+   ANALYTICS TRACKER
+   Tambahkan snippet ini di bagian PALING BAWAH script.js,
+   tepat sebelum closing tag </script> atau akhir file.
+   ───────────────────────────────────────────────────── */
+
+(function () {
+  const API = '/api/analytics';
+
+  // ── Session ID ───────────────────────────────────────
+  let sessionId = sessionStorage.getItem('_sid');
+  if (!sessionId) {
+    sessionId = 'sid_' + Date.now() + '_' + Math.random().toString(36).slice(2, 9);
+    sessionStorage.setItem('_sid', sessionId);
+  }
+  const sessionStart = Date.now();
+
+  // ── Pageview ─────────────────────────────────────────
+  function trackPageview() {
+    fetch(API + '/pageview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        session_id: sessionId,
+        page: location.pathname,
+        referrer: document.referrer || null,
+      }),
+    }).catch(() => { });
+  }
+
+  // ── Session end (durasi) ──────────────────────────────
+  function trackSessionEnd() {
+    const duration_sec = (Date.now() - sessionStart) / 1000;
+    navigator.sendBeacon(
+      API + '/session-end',
+      JSON.stringify({ session_id: sessionId, duration_sec })
+    );
+  }
+
+  // ── Product events ────────────────────────────────────
+  function trackProductEvent(productId, eventType, durationMs) {
+    fetch(API + '/product-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        product_id: productId,
+        event_type: eventType,
+        session_id: sessionId,
+        duration_ms: durationMs || null,
+      }),
+    }).catch(() => { });
+  }
+
+  // ── Attach hover tracking ke semua product cards ──────
+  function attachHoverTracking() {
+    document.querySelectorAll('.product-card[id]').forEach(card => {
+      const productId = card.id;
+      let hoverStart = null;
+
+      card.addEventListener('mouseenter', () => {
+        hoverStart = Date.now();
+        trackProductEvent(productId, 'hover_start');
+      });
+
+      card.addEventListener('mouseleave', () => {
+        if (hoverStart) {
+          const durationMs = Date.now() - hoverStart;
+          trackProductEvent(productId, 'hover_end', durationMs);
+          hoverStart = null;
+        }
+      });
+    });
+  }
+
+  // ── Attach cart tracking ──────────────────────────────
+  // Intercept addToCart calls — hook ke event delegation
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.add-to-cart-btn');
+    if (!btn) return;
+    const card = btn.closest('.product-card[id]');
+    if (!card) return;
+    // Tunggu sebentar agar cart logic jalan dulu
+    setTimeout(() => trackProductEvent(card.id, 'cart_add'), 100);
+  });
+
+  // ── Init ──────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    trackPageview();
+    attachHoverTracking();
+
+    // Re-attach jika produk dirender ulang (products.html)
+    const grid = document.getElementById('productsGrid');
+    if (grid) {
+      new MutationObserver(() => attachHoverTracking())
+        .observe(grid, { childList: true });
+    }
+  });
+
+  window.addEventListener('beforeunload', trackSessionEnd);
+  window.addEventListener('pagehide', trackSessionEnd);
+})();
