@@ -256,6 +256,21 @@ app.post('/api/admin/login', async (req, res) => {
   }
 });
 
+// Buat admin pertama — hapus route ini setelah dipakai di production!
+app.post('/api/admin/setup', async (req, res) => {
+  try {
+    const { name, email, password, setupKey } = req.body;
+    if (setupKey !== process.env.ADMIN_SETUP_KEY) return res.status(403).json({ error: 'Setup key salah.' });
+    const [existing] = await db.execute('SELECT id FROM admins WHERE email = ?', [email]);
+    if (existing.length) return res.status(400).json({ error: 'Admin sudah ada.' });
+    const hashed = await bcrypt.hash(password, 10);
+    await db.execute('INSERT INTO admins (name, email, password) VALUES (?, ?, ?)', [name, email, hashed]);
+    res.json({ message: 'Admin berhasil dibuat.' });
+  } catch (e) {
+    res.status(500).json({ error: 'Terjadi kesalahan server.' });
+  }
+});
+
 // ─── PRODUCTS API (publik – baca) ─────────────────────
 app.get('/api/products', async (req, res) => {
   try {
@@ -463,6 +478,17 @@ app.get('/api/admin/users', authenticateAdmin, async (req, res) => {
     res.json(rows);
   } catch (e) {
     res.status(500).json({ error: 'Gagal mengambil users.' });
+  }
+});
+
+app.delete('/api/admin/users/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.execute('SELECT id FROM users WHERE id = ?', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Pengguna tidak ditemukan.' });
+    await db.execute('DELETE FROM users WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Pengguna berhasil dihapus.' });
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal menghapus pengguna.' });
   }
 });
 
