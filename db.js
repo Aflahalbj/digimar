@@ -1,7 +1,8 @@
 require('dotenv').config();
-const fs = require('fs');
+// const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql2/promise');
+const caCert = process.env.DB_CA_CERT;
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -16,7 +17,8 @@ const pool = mysql.createPool({
   enableKeepAlive: true,
   keepAliveInitialDelay: 10000,
   ssl: {
-    ca: fs.readFileSync(path.join(__dirname, 'ca.pem'))
+    rejectUnauthorized: true,
+    ca: caCert
   }
 });
 pool.on('error', (err) => {
