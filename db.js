@@ -3,6 +3,7 @@ require('dotenv').config();
 const path = require('path');
 const mysql = require('mysql2/promise');
 const caCert = process.env.DB_CA_CERT;
+const isVercel = process.env.VERCEL === '1';
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
