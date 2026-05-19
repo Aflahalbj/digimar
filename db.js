@@ -18,7 +18,9 @@ const pool = mysql.createPool({
   keepAliveInitialDelay: 10000,
   ssl: {
     rejectUnauthorized: true,
-    ca: caCert
+    ca: isVercel
+      ? caCert // Ambil dari Environment Variable Vercel
+      : fs.readFileSync(path.join(__dirname, 'ca.pem')) // Baca file lokal
   }
 });
 pool.on('error', (err) => {
