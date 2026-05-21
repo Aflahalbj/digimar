@@ -833,13 +833,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ── Attach hover tracking ke semua product cards ──────
   function attachHoverTracking() {
-    document.querySelectorAll('.product-card[id]').forEach(card => {
-      const productId = card.id;
+    document.querySelectorAll('.product-img-wrap').forEach(card => {
+      const productId = card.closest('.product-card[id]')?.id;
       let hoverStart = null;
 
       card.addEventListener('mouseenter', () => {
         hoverStart = Date.now();
         trackProductEvent(productId, 'hover_start');
+        console.log(`Hover start on product ${productId}`);
       });
 
       card.addEventListener('mouseleave', () => {
@@ -847,6 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const durationMs = Date.now() - hoverStart;
           trackProductEvent(productId, 'hover_end', durationMs);
           hoverStart = null;
+          console.log(`Hover end on product ${productId}`);
         }
       });
     });

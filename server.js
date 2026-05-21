@@ -295,9 +295,39 @@ app.get('/api/products/:id', async (req, res) => {
   try {
     const [rows] = await db.execute('SELECT * FROM products WHERE id = ?', [req.params.id]);
     if (!rows.length) return res.status(404).json({ error: 'Produk tidak ditemukan.' });
+
     res.json(rows[0]);
   } catch (e) {
     res.status(500).json({ error: 'Gagal mengambil produk.' });
+  }
+
+});
+// Halaman Web Detail Produk (Ramah SEO)
+app.get('/products/:id', async (req, res) => {
+  try {
+    // 1. Ambil data dari database
+    const [rows] = await db.execute('SELECT * FROM products WHERE id = ?', [req.params.id]);
+    
+    if (!rows.length) {
+      return res.status(404).send('Produk tidak ditemukan.');
+    }
+    
+    const produk = rows[0]; // Isinya kolom: brand, name, color, dll.
+
+    // 2. Racik rumus Meta SEO dari kolom database
+    // Sesuaikan nama properti (misal: produk.brand, produk.name) dengan kolom di tabel MySQL kamu
+    const metaTitle = `${produk.brand} ${produk.name} ${produk.scale} - Diecastku`;
+    const metaDesc = `Beli ${produk.brand} ${produk.name} ${produk.scale} Original di Diecastku. Garansi 100% ori, packing aman!`;
+
+    // 3. Render ke file EJS/HTML
+    res.render('detail-produk', { 
+      produk: produk, 
+      pageTitle: metaTitle, 
+      pageDesc: metaDesc 
+    });
+
+  } catch (e) {
+    res.status(500).send('Gagal memuat halaman produk.');
   }
 });
 
