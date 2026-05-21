@@ -11,6 +11,7 @@ const app = express();
 // ─── CORS ─────────────────────────────────────────────
 const allowedOrigins = [
   'https://diecastindonesia.vercel.app',
+  'https://diecastku.vercel.app',
   'http://localhost:5000',
   'http://localhost:3000',
   'http://localhost:16512'
