@@ -166,7 +166,17 @@ app.post('/api/auth/login', async (req, res) => {
 // Get user's cart
 app.get('/api/cart', authenticateToken, async (req, res) => {
   try {
-    const [cartItems] = await db.execute('SELECT product_id as id, product_name as name, price, emoji, qty FROM cart WHERE user_id = ?', [req.user.id]);
+    const [cartItems] = await db.execute(
+      `SELECT 
+      c.product_id as id, 
+      c.product_name as name, 
+      c.price, 
+      p.img,
+      c.qty 
+      FROM cart c
+      LEFT JOIN products p ON c.product_id = p.id
+      WHERE c.user_id = ?`, 
+      [req.user.id]);
     res.json(cartItems);
   } catch (error) {
     res.status(500).json({ error: 'Gagal mengambil keranjang.' });
@@ -208,12 +218,11 @@ app.post('/api/cart/sync', authenticateToken, async (req, res) => {
 
     // Insert new cart items
     if (cart.length > 0) {
-      for (const item of cart) {
-        await connection.execute(
-          'INSERT INTO cart (user_id, product_id, product_name, price, emoji, qty) VALUES (?, ?, ?, ?, ?, ?)',
-          [req.user.id, item.id, item.name, item.price, item.emoji || '🚗', item.qty]
-        );
-      }
+      const values = cart.map(item => [req.user.id, item.id, item.name, item.price, item.emoji || '🚗', item.qty]);
+      await connection.query(
+        'INSERT INTO cart (user_id, product_id, product_name, price, emoji, qty) VALUES ?',
+        [values]
+      );
     }
 
     await connection.commit();
@@ -257,19 +266,19 @@ app.post('/api/admin/login', async (req, res) => {
 });
 
 // Buat admin pertama — hapus route ini setelah dipakai di production!
-app.post('/api/admin/setup', async (req, res) => {
-  try {
-    const { name, email, password, setupKey } = req.body;
-    if (setupKey !== process.env.ADMIN_SETUP_KEY) return res.status(403).json({ error: 'Setup key salah.' });
-    const [existing] = await db.execute('SELECT id FROM admins WHERE email = ?', [email]);
-    if (existing.length) return res.status(400).json({ error: 'Admin sudah ada.' });
-    const hashed = await bcrypt.hash(password, 10);
-    await db.execute('INSERT INTO admins (name, email, password) VALUES (?, ?, ?)', [name, email, hashed]);
-    res.json({ message: 'Admin berhasil dibuat.' });
-  } catch (e) {
-    res.status(500).json({ error: 'Terjadi kesalahan server.' });
-  }
-});
+// app.post('/api/admin/setup', async (req, res) => {
+//   try {
+//     const { name, email, password, setupKey } = req.body;
+//     if (setupKey !== process.env.ADMIN_SETUP_KEY) return res.status(403).json({ error: 'Setup key salah.' });
+//     const [existing] = await db.execute('SELECT id FROM admins WHERE email = ?', [email]);
+//     if (existing.length) return res.status(400).json({ error: 'Admin sudah ada.' });
+//     const hashed = await bcrypt.hash(password, 10);
+//     await db.execute('INSERT INTO admins (name, email, password) VALUES (?, ?, ?)', [name, email, hashed]);
+//     res.json({ message: 'Admin berhasil dibuat.' });
+//   } catch (e) {
+//     res.status(500).json({ error: 'Terjadi kesalahan server.' });
+//   }
+// });
 
 // ─── PRODUCTS API (publik – baca) ─────────────────────
 app.get('/api/products', async (req, res) => {

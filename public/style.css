@@ -18,10 +18,14 @@
   --text-secondary: #94a3b8;
   --text-muted: #475569;
   --gradient-main: linear-gradient(135deg, #f97316, #ef4444, #f97316);
-  --gradient-card: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(59, 130, 246, 0.1));
+  --gradient-card: linear-gradient(
+    135deg,
+    rgba(249, 115, 22, 0.1),
+    rgba(59, 130, 246, 0.1)
+  );
   --shadow-primary: 0 0 40px rgba(249, 115, 22, 0.3);
-  --font-main: 'Outfit', sans-serif;
-  --font-display: 'Rajdhani', sans-serif;
+  --font-main: "Outfit", sans-serif;
+  --font-display: "Rajdhani", sans-serif;
   --radius: 16px;
   --radius-sm: 8px;
   --radius-lg: 24px;
@@ -258,23 +262,36 @@ ul {
   padding: 120px 32px 80px;
   overflow: hidden;
   width: 100%;
-  background-image: url(https://cdnb.artstation.com/p/assets/images/images/066/741/571/large/fg-renders-yellow-car-3.jpg?1693652900);
+  /* background-image: url(https://cdnb.artstation.com/p/assets/images/images/066/741/571/large/fg-renders-yellow-car-3.jpg?1693652900); */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   text-align: left;
 }
 
+.video-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Video otomatis terpotong rapi seperti background-size: cover */
+  z-index: -2; /* Berada di paling belakang */
+}
+
 .hero::before {
   content: "";
   position: absolute;
-  inset: 0;
-  background: linear-gradient(to right, rgba(5, 8, 16, 0.7), rgba(5, 8, 16, 0));
-  z-index: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.3); /* Hitam transparan 50% */
+  z-index: -1; /* Di atas video, di bawah teks */
 }
 
 .hero-bg {
-  position: fixed;
+  position: relative;
   inset: 0;
   z-index: -1;
   pointer-events: none;
@@ -315,7 +332,6 @@ ul {
 } */
 
 @keyframes glowPulse {
-
   0%,
   100% {
     opacity: 0.1;
@@ -328,14 +344,14 @@ ul {
   }
 }
 
-.grid-overlay {
+/* .grid-overlay {
   position: absolute;
   inset: 0;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
   background-size: 60px 60px;
-}
+} */
 
 .hero-content {
   position: relative;
@@ -372,7 +388,6 @@ ul {
 } */
 
 @keyframes blink {
-
   0%,
   100% {
     opacity: 1;
@@ -447,12 +462,15 @@ ul {
   min-height: 480px;
 }
 
-
 .hero-image-glow {
   position: absolute;
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(249, 115, 22, 0.25), transparent 70%);
+  background: radial-gradient(
+    circle,
+    rgba(249, 115, 22, 0.25),
+    transparent 70%
+  );
   border-radius: 50%;
   filter: blur(40px);
 }
@@ -461,7 +479,9 @@ ul {
   width: 100%;
   max-width: 560px;
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5), 0 0 60px rgba(249, 115, 22, 0.1);
+  box-shadow:
+    0 20px 80px rgba(0, 0, 0, 0.5),
+    0 0 60px rgba(249, 115, 22, 0.1);
   animation: float 3s ease-in-out infinite;
   position: relative;
   z-index: 1;
@@ -469,7 +489,6 @@ ul {
 }
 
 @keyframes float {
-
   0%,
   100% {
     transform: translateY(0);
@@ -590,7 +609,6 @@ ul {
   }
 }
 
-
 /* ============ SECTION COMMONS ============ */
 .section-container {
   max-width: 1280px;
@@ -686,7 +704,9 @@ ul {
 .product-card:hover {
   /* transform: translateY(-8px); */
   border-color: var(--border-hover);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 0 0 30px rgba(249, 115, 22, 0.1);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(249, 115, 22, 0.1);
 }
 
 .product-card.featured {
@@ -772,7 +792,7 @@ ul {
 }
 
 /* Sembunyikan tulisan saat gambar hilang (saat 3D aktif) */
-.product-img[style*="display: none"]~.model-hint {
+.product-img[style*="display: none"] ~ .model-hint {
   opacity: 0;
   visibility: hidden;
 }
@@ -785,10 +805,12 @@ ul {
   /* PENTING: Supaya kita tetap bisa putar model 3D-nya */
 
   /* Efek Gradient: tengah transparan, pinggir hitam agak transparan */
-  background: radial-gradient(circle,
-      rgba(0, 0, 0, 0) 40%,
-      rgba(0, 0, 0, 0.4) 80%,
-      rgba(0, 0, 0, 0.7) 100%);
+  background: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 0) 40%,
+    rgba(0, 0, 0, 0.4) 80%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
   z-index: 5;
   /* Pastikan di atas model-viewer tapi di bawah badge */
 }
@@ -805,7 +827,7 @@ ul {
   /* Warna background card kamu */
   color: #f97316;
   /* Warna primary oranye */
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 0.8rem;
   z-index: 10;
 }
@@ -863,8 +885,6 @@ ul {
   color: var(--text-muted);
   letter-spacing: 1px;
 }
-
-
 
 .product-info {
   padding: 20px 24px 24px;
@@ -984,15 +1004,15 @@ ul {
   overflow: hidden;
 }
 
-.feature-card::before {
-  content: '';
+/* .feature-card::before {
+  content: "";
   position: absolute;
   inset: 0;
   background: var(--gradient-card);
   opacity: 0;
   transition: var(--transition);
   border-radius: inherit;
-}
+} */
 
 .feature-card:hover {
   border-color: var(--border-hover);
@@ -1000,9 +1020,9 @@ ul {
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
 }
 
-.feature-card:hover::before {
+/* .feature-card:hover::before {
   opacity: 1;
-}
+} */
 
 .feature-icon {
   position: relative;
@@ -1099,7 +1119,6 @@ ul {
 }
 
 @keyframes tagPulse {
-
   0%,
   100% {
     box-shadow: 0 0 0 0 rgba(249, 115, 22, 0);
@@ -1438,7 +1457,7 @@ ul {
   border: 1px solid var(--border);
   border-left: 4px solid var(--primary);
   border-radius: var(--radius);
-  padding: 16px 24px;
+  padding: 16px 45px 16px 24px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -1449,6 +1468,28 @@ ul {
   opacity: 0;
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 9999;
+}
+
+.toast-close-btn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 4px;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-close-btn:hover {
+  color: #ef4444;
+  transform: translateY(-50%) scale(1.15);
 }
 
 .toast.show {
@@ -1469,7 +1510,9 @@ ul {
 .fade-up {
   opacity: 0;
   transform: translateY(40px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
 }
 
 .fade-up.visible {
@@ -1487,7 +1530,11 @@ ul {
   }
 
   .hero::before {
-    background: linear-gradient(to bottom, rgba(5, 8, 16, 0.8), rgba(5, 8, 16, 0.4));
+    background: linear-gradient(
+      to bottom,
+      rgba(5, 8, 16, 0.8),
+      rgba(5, 8, 16, 0.4)
+    );
   }
 
   .hero-content {
@@ -1518,7 +1565,6 @@ ul {
 }
 
 @media (max-width: 768px) {
-
   .nav-menu {
     display: none;
     flex-direction: column;
@@ -1851,7 +1897,7 @@ ul {
   }
 }
 
-.cart-item-emoji {
+.cart-item-img {
   font-size: 1.8rem;
   flex-shrink: 0;
   width: 44px;
@@ -1861,6 +1907,13 @@ ul {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.item-img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
 }
 
 .cart-item-info {

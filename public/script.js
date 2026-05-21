@@ -16,16 +16,44 @@ function formatRupiah(num) {
 }
 
 // ─── TOAST ─────────────────────────────────────────
-function showToast(msg, icon = '🛒') {
+function showToast(msg, icon = '<i class="fas fa-shopping-cart"></i>') {
   const toast = document.getElementById('toast');
   const toastMsg = document.getElementById('toastMsg');
   const toastIcon = document.querySelector('.toast-icon');
   if (!toast || !toastMsg) return;
-  if (toastIcon) toastIcon.textContent = icon;
-  toastMsg.textContent = msg;
+  
+  if (toastIcon) toastIcon.innerHTML = icon;
+  toastMsg.innerHTML = msg;
+
+  // Hapus tombol "X" lama jika sebelumnya sudah ada (biar tidak duplikat)
+  const oldCloseBtn = toast.querySelector('.toast-close-btn');
+  if (oldCloseBtn) oldCloseBtn.remove();
+
+  // Tambah elemen tombol "X" baru ke dalam toast
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'toast-close-btn';
+  closeBtn.innerHTML = '<i class="fas fa-xmark"></i>';
+  toast.appendChild(closeBtn);
+
+  // Jalankan animasi muncul
   toast.classList.add('show');
+
+  // Fungsi internal untuk menyembunyikan toast
+  const hideToast = () => {
+    toast.classList.remove('show');
+  };
+
+  // EVENT LISTENER: Klik tombol "X" langsung menutup toast saat itu juga
+  closeBtn.addEventListener('click', (e) => {
+    e.stopPropagation(); // Biar tidak memicu event klik lain
+    hideToast();
+  });
+
+  // TIMEOUT OTOMATIS: Tetap menutup sendiri setelah 3 detik jika tidak diklik
   clearTimeout(toast._timer);
-  toast._timer = setTimeout(() => toast.classList.remove('show'), 3000);
+  toast._timer = setTimeout(() => {
+    hideToast();
+  }, 3000);
 }
 function debounce(fn, delay) {
   let timer;
@@ -74,7 +102,7 @@ function renderCart() {
       el.className = 'cart-item';
       el.dataset.id = item.id;
       el.innerHTML = `
-        <div class="cart-item-emoji">${item.emoji}</div>
+        <div class="cart-item-img"><img src="${item.img}" alt="🚗" class="item-img"></div>
         <div class="cart-item-info">
           <div class="cart-item-name">${item.name}</div>
           <div class="cart-item-price">${formatRupiah(item.price)}</div>
@@ -83,7 +111,7 @@ function renderCart() {
           <button class="qty-btn qty-dec" data-id="${item.id}">−</button>
           <span class="qty-num">${item.qty}</span>
           <button class="qty-btn qty-inc" data-id="${item.id}">+</button>
-          <button class="remove-btn" data-id="${item.id}" title="Hapus">🗑</button>
+          <button class="remove-btn" data-id="${item.id}" title="Hapus"><i class="fa-solid fa-trash-can"></i></button>
         </div>
       `;
       body.appendChild(el);
@@ -109,10 +137,10 @@ function renderCart() {
 }
 
 // ─── CART ACTIONS ──────────────────────────────────
-function addToCart(id, name, price, emoji) {
+function addToCart(id, name, price, img) {
   const token = localStorage.getItem('token');
   if (!token) {
-    showToast('Silakan daftar/login dulu ya! 🔒', '⚠️');
+    showToast('Silakan daftar/login dulu ya!&nbsp;&nbsp;<i class="fa-solid fa-key" style="color: var(--gold);"></i>', '<i class="fa-solid fa-triangle-exclamation" style="color: var(--gold);"></i>');
     setTimeout(() => { window.location.href = 'login.html'; }, 1500);
     return false;
   }
@@ -121,7 +149,7 @@ function addToCart(id, name, price, emoji) {
   if (existing) {
     existing.qty++;
   } else {
-    cart.push({ id, name, price, emoji, qty: 1 });
+    cart.push({ id, name, price, img, qty: 1 });
   }
   updateBadge();
   renderCart();
@@ -144,31 +172,32 @@ function removeFromCart(id) {
   cart = cart.filter(i => i.id !== id);
   updateBadge();
   renderCart();
-  showToast('Item dihapus dari keranjang', '🗑');
+  showToast('Item dihapus dari keranjang', '<i class="fa-solid fa-trash-can" style="color: red;"></i>');
 }
 
 function clearCart() {
   cart = [];
   updateBadge();
   renderCart();
-  showToast('Keranjang dikosongkan', '🗑');
+  showToast('Keranjang dikosongkan', '<i class="fa-solid fa-trash-can" style="color: red;"></i>');
 }
 
 // ─── WHATSAPP CHECKOUT ─────────────────────────────
 function checkoutWhatsApp() {
   if (cart.length === 0) {
-    showToast('Keranjang masih kosong!', '⚠️');
+    showToast('Keranjang masih kosong!', '<i class="fa-solid fa-triangle-exclamation" style="color: var(--gold);"></i>');
     return;
   }
 
   const itemLines = cart.map(i =>
-    `  • ${i.emoji} ${i.name} (${i.qty}x) = ${formatRupiah(i.price * i.qty)}`
+    `  • ${i.name} (${i.qty}x) = 
+    ${formatRupiah(i.price * i.qty)}`
   ).join('\n');
 
   const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
 
   const message =
-    `Halo DAICAST! 👋\n\n` +
+    `Halo  admin DAICASTKU! 👋\n\n` +
     `Saya mau beli semua yang di keranjang:\n\n` +
     `${itemLines}\n\n` +
     `━━━━━━━━━━━━━━━━━━━\n` +
@@ -202,9 +231,9 @@ function initCartButtons() {
       const id = card.id;
       const name = card.dataset.name || card.querySelector('.product-name')?.textContent || 'Item';
       const price = parseInt(card.dataset.price || '0');
-      const emoji = card.dataset.emoji || '🚗';
+      const img = card.querySelector('.product-img')?.src;
 
-      const added = addToCart(id, name, price, emoji);
+      const added = addToCart(id, name, price, img);
       if (!added) return;
 
       // Flash the main button if it's the main one (not overlay)
@@ -380,7 +409,7 @@ if (newsletterForm) {
     e.preventDefault();
     const emailInput = document.getElementById('emailInput');
     if (emailInput?.value) {
-      showToast('Berhasil daftar! Cek inbox kamu 🎉', '📧');
+      showToast('Berhasil daftar! Cek inbox kamu 🎉', '<i class="fa-solid fa-envelope-circle-check"></i>');
       emailInput.value = '';
     }
   });
@@ -587,7 +616,7 @@ function aktifkan3D(container) {
     model.setAttribute('camera-orbit', '250deg 75deg auto');
     model.setAttribute('camera-controls', '');
     model.setAttribute('bounds', 'tight');
-    model.setAttribute('rotation-per-second', '400deg');
+    model.setAttribute('rotation-per-second', '300deg');
 
     model.addEventListener('load', () => {
       console.log("Model selesai dimuat!");
@@ -595,11 +624,11 @@ function aktifkan3D(container) {
       setTimeout(() => {
         model.dataset.justLoaded = 'false';
         model.rotationPerSecond = "50deg";
-      }, 500);
+      }, 700);
 
       setTimeout(() => {
         model.style.transform = 'scale(1.3)';
-        model.style.transition = 'transform 0.5s ease-in-out';
+        model.style.transition = 'transform 0.7s ease-in-out';
       }, 0);
     });
 

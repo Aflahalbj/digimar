@@ -17,6 +17,7 @@ const pool = mysql.createPool({
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 10000,
+  timezone: '+07:00',
   ssl: {
     rejectUnauthorized: true,
     ca: isVercel
