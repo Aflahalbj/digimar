@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://tugas-kamu.vercel.app/sitemap.xml
+Sitemap: https://diecastku.vercel.app/sitemap.xml
