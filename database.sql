@@ -95,3 +95,15 @@ CREATE TABLE IF NOT EXISTS admins (
   password   VARCHAR(255) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+-- ── NEWSLETTER SUBSCRIBERS ──────────────────────────
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id           INT AUTO_INCREMENT PRIMARY KEY,
+  email        VARCHAR(100) NOT NULL UNIQUE,
+  subscribed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_email (email)
+);
+
+-- ── PASSWORD RESET TOKENS ───────────────────────────
+-- (disimpan di memori server, tabel ini opsional untuk persistensi)
+-- Tambahkan kolom sort_order ke products jika belum ada
+ALTER TABLE products ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;

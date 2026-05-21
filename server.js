@@ -5,6 +5,26 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('./db');
 const rateLimit = require('express-rate-limit');
+// ─── SMTP MAILER ──────────────────────────────────────
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+
+function createTransporter() {
+  return nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT) || 587,
+    secure: process.env.SMTP_SECURE === 'true',
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  });
+}
+async function sendMail({ to, subject, html }) {
+  const transporter = createTransporter();
+  await transporter.sendMail({
+    from: '"' + (process.env.SMTP_FROM_NAME || 'Diecastku') + '" <' + process.env.SMTP_USER + '>',
+    to, subject, html,
+  });
+}
+
 
 const app = express();
 
@@ -284,7 +304,13 @@ app.post('/api/admin/login', async (req, res) => {
 // ─── PRODUCTS API (publik – baca) ─────────────────────
 app.get('/api/products', async (req, res) => {
   try {
-    const [rows] = await db.execute('SELECT * FROM products WHERE is_active = 1 ORDER BY created_at DESC');
+    const { price_min, price_max } = req.query;
+    let query = 'SELECT * FROM products WHERE is_active = 1';
+    const params = [];
+    if (price_min) { query += ' AND price >= ?'; params.push(parseInt(price_min)); }
+    if (price_max) { query += ' AND price <= ?'; params.push(parseInt(price_max)); }
+    query += ' ORDER BY sort_order ASC, created_at DESC';
+    const [rows] = await db.execute(query, params);
     res.json(rows);
   } catch (e) {
     res.status(500).json({ error: 'Gagal mengambil produk.' });
@@ -529,6 +555,137 @@ app.delete('/api/admin/users/:id', authenticateAdmin, async (req, res) => {
     res.json({ message: 'Pengguna berhasil dihapus.' });
   } catch (e) {
     res.status(500).json({ error: 'Gagal menghapus pengguna.' });
+  }
+});
+
+
+// ─── NEWSLETTER ───────────────────────────────────────
+app.post('/api/newsletter/subscribe', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !EMAIL_RE.test(email)) return res.status(400).json({ error: 'Format email tidak valid.' });
+    const norm = email.toLowerCase().trim();
+    await db.execute(
+      'INSERT INTO newsletter_subscribers (email) VALUES (?) ON DUPLICATE KEY UPDATE subscribed_at = subscribed_at',
+      [norm]
+    );
+    // Kirim email konfirmasi
+    try {
+      await sendMail({
+        to: norm,
+        subject: '🏎️ Kamu Berhasil Daftar Newsletter Diecastku!',
+        html: `
+          <div style="font-family:sans-serif;max-width:480px;margin:0 auto;background:#0d1117;color:#f8fafc;padding:32px;border-radius:16px">
+            <h2 style="color:#f97316">🏎️ Selamat datang di Diecastku!</h2>
+            <p>Kamu berhasil daftar newsletter kami. Kamu akan dapat info promo & rilis koleksi terbaru duluan!</p>
+            <p style="color:#94a3b8;font-size:0.85rem">Jika kamu tidak merasa mendaftar, abaikan email ini.</p>
+          </div>`,
+      });
+    } catch (mailErr) {
+      console.error('Gagal kirim email konfirmasi newsletter:', mailErr.message);
+    }
+    res.json({ message: 'Berhasil daftar newsletter!' });
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal mendaftar newsletter.' });
+  }
+});
+
+// ─── FORGOT PASSWORD ──────────────────────────────────
+const resetTokens = new Map(); // token -> { email, exp }
+
+app.post('/api/auth/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email wajib diisi.' });
+    const norm = email.toLowerCase().trim();
+    const [users] = await db.execute('SELECT id FROM users WHERE email = ?', [norm]);
+    // Selalu return 200 meski email tidak ada (mencegah user enumeration)
+    if (!users.length) return res.json({ message: 'Jika email terdaftar, link reset telah dikirim.' });
+    const token = crypto.randomBytes(32).toString('hex');
+    const exp = Date.now() + 60 * 60 * 1000; // 1 jam
+    resetTokens.set(token, { email: norm, exp });
+    const resetLink = (process.env.BASE_URL || 'http://localhost:5000') + '/reset-password.html?token=' + token;
+    await sendMail({
+      to: norm,
+      subject: '🔑 Reset Password Diecastku',
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;background:#0d1117;color:#f8fafc;padding:32px;border-radius:16px">
+          <h2 style="color:#f97316">🔑 Reset Password</h2>
+          <p>Klik tombol di bawah untuk reset password. Link berlaku <strong>1 jam</strong>.</p>
+          <a href="${resetLink}" style="display:inline-block;margin:16px 0;padding:12px 28px;background:#f97316;color:#fff;border-radius:8px;text-decoration:none;font-weight:700">Reset Password</a>
+          <p style="color:#94a3b8;font-size:0.85rem">Jika kamu tidak meminta reset, abaikan email ini.</p>
+        </div>`,
+    });
+    res.json({ message: 'Jika email terdaftar, link reset telah dikirim.' });
+  } catch (e) {
+    console.error('Forgot password error:', e);
+    res.status(500).json({ error: 'Gagal mengirim email reset.' });
+  }
+});
+
+app.post('/api/auth/reset-password', async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password || password.length < 6) {
+      return res.status(400).json({ error: 'Token dan password (min 6 karakter) wajib diisi.' });
+    }
+    const entry = resetTokens.get(token);
+    if (!entry || Date.now() > entry.exp) {
+      return res.status(400).json({ error: 'Link reset tidak valid atau sudah kedaluwarsa.' });
+    }
+    const hashed = await bcrypt.hash(password, 10);
+    await db.execute('UPDATE users SET password = ? WHERE email = ?', [hashed, entry.email]);
+    resetTokens.delete(token);
+    res.json({ message: 'Password berhasil direset!' });
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal reset password.' });
+  }
+});
+
+// ─── BROADCAST EMAIL (admin) ──────────────────────────
+app.post('/api/admin/broadcast', authenticateAdmin, async (req, res) => {
+  try {
+    const { subject, html, target } = req.body;
+    // target: 'all' | 'users' | 'newsletter'
+    if (!subject || !html) return res.status(400).json({ error: 'Subject dan isi pesan wajib diisi.' });
+    let emails = [];
+    if (target === 'users' || target === 'all') {
+      const [rows] = await db.execute('SELECT email FROM users');
+      emails.push(...rows.map(r => r.email));
+    }
+    if (target === 'newsletter' || target === 'all') {
+      const [rows] = await db.execute('SELECT email FROM newsletter_subscribers');
+      emails.push(...rows.map(r => r.email));
+    }
+    // Deduplicate
+    emails = [...new Set(emails)];
+    if (!emails.length) return res.status(400).json({ error: 'Tidak ada penerima.' });
+    // Kirim batch (pakai BCC per 50 untuk menghindari spam filter)
+    const BATCH = 50;
+    let sent = 0;
+    for (let i = 0; i < emails.length; i += BATCH) {
+      const batch = emails.slice(i, i + BATCH);
+      await sendMail({ to: process.env.SMTP_USER, subject, html: html + '<p style="font-size:0.7rem;color:#666">Dikirim ke ' + batch.length + ' penerima</p>' });
+      // Kirim ke tiap penerima individual (untuk personalisasi nama di masa depan)
+      for (const email of batch) {
+        try { await sendMail({ to: email, subject, html }); sent++; } catch (_) {}
+      }
+    }
+    res.json({ message: `Email berhasil dikirim ke ${sent} penerima.` });
+  } catch (e) {
+    console.error('Broadcast error:', e);
+    res.status(500).json({ error: 'Gagal mengirim broadcast: ' + e.message });
+  }
+});
+
+app.get('/api/admin/broadcast/recipients-count', authenticateAdmin, async (req, res) => {
+  try {
+    const [[{ users }]] = await db.execute('SELECT COUNT(*) as users FROM users');
+    const [[{ newsletter }]] = await db.execute('SELECT COUNT(*) as newsletter FROM newsletter_subscribers');
+    res.json({ users, newsletter, all: users + newsletter });
+  } catch (e) {
+    res.status(500).json({ error: 'Gagal.' });
   }
 });
 

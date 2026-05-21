@@ -1,4 +1,3 @@
-
 /* ===================================================
 DAICAST – Premium Diecast Collectibles
 Main JavaScript – Cart + WhatsApp Checkout
@@ -136,24 +135,100 @@ function renderCart() {
   }
 }
 
-// ─── CART ACTIONS ──────────────────────────────────
-function addToCart(id, name, price, img) {
+// ─── CART POPUP (brand + qty) ──────────────────────
+function showCartPopup(id, name, price, img) {
   const token = localStorage.getItem('token');
   if (!token) {
     showToast('Silakan daftar/login dulu ya!&nbsp;&nbsp;<i class="fa-solid fa-key" style="color: var(--gold);"></i>', '<i class="fa-solid fa-triangle-exclamation" style="color: var(--gold);"></i>');
     setTimeout(() => { window.location.href = 'login.html'; }, 1500);
     return false;
   }
+  // Remove existing popup if any
+  document.getElementById('cartPopupOverlay')?.remove();
 
-  const existing = cart.find(i => i.id === id);
+  const overlay = document.createElement('div');
+  overlay.id = 'cartPopupOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s ease';
+  overlay.innerHTML = `
+    <style>
+      @keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+      #cartPopup{background:#0d1117;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px;width:100%;max-width:400px;color:#f8fafc;font-family:'Outfit',sans-serif}
+      #cartPopup h3{font-size:1.1rem;font-weight:700;margin-bottom:4px;font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
+      #cartPopup .popup-sub{font-size:.8rem;color:#94a3b8;margin-bottom:20px}
+      #cartPopup .popup-label{font-size:.8rem;font-weight:600;color:#94a3b8;margin-bottom:7px;display:block}
+      #cartPopup .brand-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+      #cartPopup .brand-btn{padding:10px 6px;border:1.5px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.25);color:#f8fafc;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;transition:.2s;text-align:center}
+      #cartPopup .brand-btn:hover,#cartPopup .brand-btn.selected{border-color:#f97316;background:rgba(249,115,22,.12);color:#f97316}
+      #cartPopup .qty-row{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+      #cartPopup .qty-ctrl{width:36px;height:36px;border:1.5px solid rgba(255,255,255,0.15);background:none;color:#f8fafc;border-radius:8px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+      #cartPopup .qty-ctrl:hover{border-color:#f97316;color:#f97316}
+      #cartPopup .qty-val{font-size:1.2rem;font-weight:700;min-width:28px;text-align:center;font-family:'Rajdhani',sans-serif}
+      #cartPopup .popup-actions{display:flex;gap:10px}
+      #cartPopup .popup-cancel{flex:1;padding:11px;background:none;border:1.5px solid rgba(255,255,255,0.1);color:#94a3b8;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600;transition:.2s}
+      #cartPopup .popup-cancel:hover{border-color:#94a3b8;color:#f8fafc}
+      #cartPopup .popup-add{flex:2;padding:11px;background:linear-gradient(135deg,#f97316,#ea580c);border:none;color:#fff;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:700;font-size:.95rem;transition:.2s;box-shadow:0 4px 14px rgba(249,115,22,.35)}
+      #cartPopup .popup-add:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(249,115,22,.5)}
+    </style>
+    <div id="cartPopup">
+      <h3>🛒 Tambah ke Keranjang</h3>
+      <div class="popup-sub">${name.length > 38 ? name.slice(0,38)+'…' : name}</div>
+      <span class="popup-label">Pilih Brand</span>
+      <div class="brand-grid">
+        <button class="brand-btn selected" data-brand="Hot Wheels">🔥 Hot Wheels</button>
+        <button class="brand-btn" data-brand="Mini GT">⭐ Mini GT</button>
+        <button class="brand-btn" data-brand="Matchbox">📦 Matchbox</button>
+      </div>
+      <span class="popup-label">Jumlah</span>
+      <div class="qty-row">
+        <button class="qty-ctrl" id="popupQtyDec">−</button>
+        <span class="qty-val" id="popupQtyVal">1</span>
+        <button class="qty-ctrl" id="popupQtyInc">+</button>
+      </div>
+      <div class="popup-actions">
+        <button class="popup-cancel" id="popupCancel">Batal</button>
+        <button class="popup-add" id="popupConfirm">Tambah ke Keranjang</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  let selectedBrand = 'Hot Wheels';
+  let qty = 1;
+
+  overlay.querySelectorAll('.brand-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      overlay.querySelectorAll('.brand-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedBrand = btn.dataset.brand;
+    });
+  });
+  document.getElementById('popupQtyDec').addEventListener('click', () => {
+    if (qty > 1) { qty--; document.getElementById('popupQtyVal').textContent = qty; }
+  });
+  document.getElementById('popupQtyInc').addEventListener('click', () => {
+    if (qty < 99) { qty++; document.getElementById('popupQtyVal').textContent = qty; }
+  });
+  document.getElementById('popupCancel').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+  document.getElementById('popupConfirm').addEventListener('click', () => {
+    overlay.remove();
+    addToCart(id, name, price, img, selectedBrand, qty);
+  });
+  return true;
+}
+
+// ─── CART ACTIONS ──────────────────────────────────
+function addToCart(id, name, price, img, brand = '', qty = 1) {
+  const existing = cart.find(i => i.id === id && i.brand === brand);
   if (existing) {
-    existing.qty++;
+    existing.qty += qty;
   } else {
-    cart.push({ id, name, price, img, qty: 1 });
+    cart.push({ id, name, price, img, brand, qty });
   }
   updateBadge();
   renderCart();
-  showToast(`${name.slice(0, 28)} ditambahkan! 🎉`);
+  showToast(`${name.slice(0, 28)} (${brand || '-'}) x${qty} ditambahkan! 🎉`);
   return true;
 }
 
@@ -233,7 +308,7 @@ function initCartButtons() {
       const price = parseInt(card.dataset.price || '0');
       const img = card.querySelector('.product-img')?.src;
 
-      const added = addToCart(id, name, price, img);
+      const added = showCartPopup(id, name, price, img);
       if (!added) return;
 
       // Flash the main button if it's the main one (not overlay)
@@ -405,12 +480,27 @@ setInterval(updateCountdown, 1000);
 // ─── NEWSLETTER FORM ───────────────────────────────
 const newsletterForm = document.getElementById('newsletterForm');
 if (newsletterForm) {
-  newsletterForm.addEventListener('submit', e => {
+  newsletterForm.addEventListener('submit', async e => {
     e.preventDefault();
     const emailInput = document.getElementById('emailInput');
-    if (emailInput?.value) {
+    const btn = newsletterForm.querySelector('button[type="submit"]') || newsletterForm.querySelector('button');
+    const email = emailInput?.value?.trim();
+    if (!email) return;
+    if (btn) { btn.disabled = true; btn.textContent = 'Mendaftar...'; }
+    try {
+      const res = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Gagal');
       showToast('Berhasil daftar! Cek inbox kamu 🎉', '<i class="fa-solid fa-envelope-circle-check"></i>');
       emailInput.value = '';
+    } catch (err) {
+      showToast('Gagal: ' + err.message, '<i class="fa-solid fa-triangle-exclamation" style="color:var(--gold)"></i>');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = 'Daftar Sekarang'; }
     }
   });
 }
@@ -444,7 +534,12 @@ async function fetchAndRenderProducts() {
   if (!grid) return; // Skip jika tidak ada grid produk di halaman ini
 
   try {
-    const response = await fetch('/api/products');
+    const priceMin = window._filterPriceMin || '';
+    const priceMax = window._filterPriceMax || '';
+    const params = new URLSearchParams();
+    if (priceMin) params.set('price_min', priceMin);
+    if (priceMax) params.set('price_max', priceMax);
+    const response = await fetch('/api/products' + (params.toString() ? '?' + params.toString() : ''));
     if (!response.ok) throw new Error('Gagal memuat produk');
     const products = await response.json();
 

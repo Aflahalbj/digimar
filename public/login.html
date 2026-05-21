@@ -244,8 +244,7 @@
           <input type="password" id="loginPassword" class="form-control" placeholder="Masukkan password" required>
         </div>
         <div class="auth-switch forgot-pw">
-          <a href="#" onclick="alert('Silakan hubungi admin via WhatsApp untuk reset password: +6283138991304')">Lupa
-            password?</a>
+          <a href="#" id="forgotPwLink">Lupa password?</a>
         </div>
         <button type="submit" class="btn btn-primary btn-auth">Masuk</button>
       </form>
@@ -346,7 +345,59 @@
         btn.textContent = 'Daftar Sekarang';
       }
     });
-  </script>
+  
+
+    // ─── LUPA PASSWORD ────────────────────────────────
+    document.getElementById('forgotPwLink').addEventListener('click', e => {
+      e.preventDefault();
+      // Buat modal lupa password
+      const existing = document.getElementById('forgotOverlay');
+      if (existing) { existing.style.display = 'flex'; return; }
+
+      const overlay = document.createElement('div');
+      overlay.id = 'forgotOverlay';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+      overlay.innerHTML = `
+        <div style="background:#0d1117;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:32px;width:100%;max-width:400px;font-family:'Outfit',sans-serif;color:#f8fafc">
+          <h3 style="font-family:'Rajdhani',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:6px">🔑 Lupa Password</h3>
+          <p style="font-size:.85rem;color:#94a3b8;margin-bottom:20px">Masukkan email kamu, kami akan kirimkan link reset password.</p>
+          <input type="email" id="forgotEmail" placeholder="email@kamu.com" style="width:100%;background:rgba(0,0,0,0.3);border:1.5px solid rgba(255,255,255,0.1);color:#f8fafc;padding:12px 14px;border-radius:10px;font-family:'Outfit',sans-serif;font-size:.9rem;outline:none;margin-bottom:14px;box-sizing:border-box">
+          <div id="forgotMsg" style="font-size:.82rem;margin-bottom:12px;min-height:18px"></div>
+          <div style="display:flex;gap:10px">
+            <button id="forgotCancel" style="flex:1;padding:11px;background:none;border:1.5px solid rgba(255,255,255,0.1);color:#94a3b8;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600">Batal</button>
+            <button id="forgotSubmit" style="flex:2;padding:11px;background:linear-gradient(135deg,#f97316,#ea580c);border:none;color:#fff;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:700">Kirim Link Reset</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+
+      document.getElementById('forgotCancel').addEventListener('click', () => overlay.style.display = 'none');
+      overlay.addEventListener('click', e => { if (e.target === overlay) overlay.style.display = 'none'; });
+
+      document.getElementById('forgotSubmit').addEventListener('click', async () => {
+        const email = document.getElementById('forgotEmail').value.trim();
+        const msgEl = document.getElementById('forgotMsg');
+        const btn = document.getElementById('forgotSubmit');
+        if (!email) { msgEl.style.color = '#ef4444'; msgEl.textContent = 'Email wajib diisi.'; return; }
+        btn.disabled = true; btn.textContent = 'Mengirim...';
+        try {
+          const res = await fetch('/api/auth/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+          });
+          const data = await res.json();
+          msgEl.style.color = '#22c55e';
+          msgEl.textContent = data.message || 'Link reset telah dikirim ke email kamu!';
+          btn.textContent = '✓ Terkirim';
+        } catch (err) {
+          msgEl.style.color = '#ef4444';
+          msgEl.textContent = 'Gagal mengirim. Coba lagi.';
+          btn.disabled = false; btn.textContent = 'Kirim Link Reset';
+        }
+      });
+    });
+</script>
 </body>
 
 </html>

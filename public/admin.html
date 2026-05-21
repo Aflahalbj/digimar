@@ -1182,6 +1182,9 @@
                     <i class="fas fa-users-cog"></i> Kelola Pengguna
                 </button>
 
+                <button class="nav-item" data-page="broadcast">
+                    <i class="fas fa-paper-plane"></i> Kirim Email Promo
+                </button>
                 <div class="nav-section-label">Lainnya</div>
                 <a class="nav-item" href="index.html" target="_blank">
                     <i class="fas fa-external-link-alt"></i> Lihat Website
@@ -1471,6 +1474,73 @@
                     </table>
                 </div>
             </div>
+
+            <!-- PAGE: BROADCAST EMAIL -->
+            <div class="page" id="page-broadcast">
+              <div style="max-width:680px">
+                <div class="chart-card" style="margin-bottom:20px">
+                  <div class="chart-header" style="margin-bottom:20px">
+                    <div>
+                      <div class="chart-title">📧 Penerima</div>
+                      <div class="chart-subtitle">Estimasi jumlah email yang akan dikirim</div>
+                    </div>
+                  </div>
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+                    <div class="stat-card" style="padding:18px">
+                      <div class="stat-icon blue"><i class="fas fa-users"></i></div>
+                      <div class="stat-val" style="font-size:1.5rem" id="bc-users">—</div>
+                      <div class="stat-label">Pengguna Terdaftar</div>
+                    </div>
+                    <div class="stat-card" style="padding:18px">
+                      <div class="stat-icon orange"><i class="fas fa-envelope"></i></div>
+                      <div class="stat-val" style="font-size:1.5rem" id="bc-newsletter">—</div>
+                      <div class="stat-label">Subscriber Newsletter</div>
+                    </div>
+                    <div class="stat-card" style="padding:18px">
+                      <div class="stat-icon green"><i class="fas fa-paper-plane"></i></div>
+                      <div class="stat-val" style="font-size:1.5rem" id="bc-all">—</div>
+                      <div class="stat-label">Total (gabungan unik)</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="chart-card">
+                  <div class="chart-title" style="margin-bottom:20px">✍️ Tulis Pesan Promosi</div>
+                  <div class="form-group">
+                    <label class="form-label">Target Penerima</label>
+                    <select class="form-select" id="bcTarget">
+                      <option value="all">Semua (Pengguna + Newsletter)</option>
+                      <option value="users">Hanya Pengguna Terdaftar</option>
+                      <option value="newsletter">Hanya Subscriber Newsletter</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Subject Email *</label>
+                    <input class="form-input" id="bcSubject" placeholder="🔥 Promo Akhir Tahun – Diskon s/d 40%!">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Isi Pesan (HTML dibolehkan) *</label>
+                    <textarea class="form-input" id="bcBody" rows="10" placeholder="<h2>Halo Sobat Diecast! 🏎️</h2>&#10;<p>Ada promo spesial...</p>" style="resize:vertical;min-height:180px;font-family:monospace;font-size:0.82rem"></textarea>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                    <button class="btn-save" id="bcPreviewBtn" style="background:none;border:1.5px solid var(--accent);color:var(--accent);box-shadow:none">
+                      <i class="fas fa-eye"></i> Preview
+                    </button>
+                    <button class="btn-save" id="bcSendBtn">
+                      <i class="fas fa-paper-plane"></i> Kirim Email
+                    </button>
+                    <span id="bcStatus" style="font-size:0.85rem;color:var(--text-muted)"></span>
+                  </div>
+                </div>
+
+                <!-- Preview pane -->
+                <div id="bcPreviewPane" style="display:none;margin-top:20px" class="chart-card">
+                  <div class="chart-title" style="margin-bottom:16px">👁 Preview Email</div>
+                  <div id="bcPreviewContent" style="background:#fff;border-radius:12px;padding:24px;min-height:80px"></div>
+                </div>
+              </div>
+            </div>
+
         </main>
     </div>
 
@@ -1689,6 +1759,7 @@
             'products-analytics': ['Produk Analytics', 'Performa produk di mata pengunjung'],
             'products-crud': ['Kelola Produk', 'Tambah, edit, dan hapus produk'],
             'users-crud': ['Kelola Pengguna', 'Daftar semua pengguna terdaftar'],
+            'broadcast': ['Kirim Email Promo', 'Broadcast pesan promosi ke pengguna & subscriber'],
         };
         function loadPage(page) {
             currentPage = page;
@@ -1702,7 +1773,7 @@
             document.getElementById('pageTitle').textContent = meta[0];
             document.getElementById('pageSub').textContent = meta[1];
             const rangeWrap = document.getElementById('rangeSelect').parentElement;
-            rangeWrap.style.display = (page === 'products-crud' || page === 'users-crud') ? 'none' : 'flex';
+            rangeWrap.style.display = (page === 'products-crud' || page === 'users-crud' || page === 'broadcast') ? 'none' : 'flex';
             fetchPageData(page);
         }
 
@@ -1716,6 +1787,7 @@
                 if (page === 'products-analytics') await fetchProductsAnalytics();
                 if (page === 'products-crud') await fetchProductsCRUD();
                 if (page === 'users-crud') await fetchUsersCRUD();
+                if (page === 'broadcast') await loadBroadcastPage();
             } catch (e) {
                 showToast('Gagal memuat data: ' + e.message, 'error');
             }
@@ -2119,6 +2191,55 @@
             }
             document.getElementById('loginScreen').style.display = 'flex';
         });
+    
+        /* ── BROADCAST ───────────────────────────────────── */
+        async function loadBroadcastPage() {
+          try {
+            const data = await api('/admin/broadcast/recipients-count');
+            document.getElementById('bc-users').textContent = data.users.toLocaleString('id-ID');
+            document.getElementById('bc-newsletter').textContent = data.newsletter.toLocaleString('id-ID');
+            document.getElementById('bc-all').textContent = data.all.toLocaleString('id-ID');
+          } catch(e) { /* ignore */ }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+          const bcPreviewBtn = document.getElementById('bcPreviewBtn');
+          const bcSendBtn = document.getElementById('bcSendBtn');
+          if (bcPreviewBtn) {
+            bcPreviewBtn.addEventListener('click', () => {
+              const html = document.getElementById('bcBody').value;
+              const pane = document.getElementById('bcPreviewPane');
+              const content = document.getElementById('bcPreviewContent');
+              content.innerHTML = html;
+              pane.style.display = pane.style.display === 'none' ? 'block' : 'none';
+            });
+          }
+          if (bcSendBtn) {
+            bcSendBtn.addEventListener('click', async () => {
+              const subject = document.getElementById('bcSubject').value.trim();
+              const html = document.getElementById('bcBody').value.trim();
+              const target = document.getElementById('bcTarget').value;
+              const status = document.getElementById('bcStatus');
+              if (!subject || !html) { showToast('Subject dan isi pesan wajib diisi.', 'error'); return; }
+              if (!confirm('Yakin mau kirim email ke semua penerima yang dipilih?')) return;
+              bcSendBtn.disabled = true; bcSendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+              status.textContent = 'Sedang mengirim, harap tunggu...';
+              try {
+                const res = await api('/admin/broadcast', { method: 'POST', body: JSON.stringify({ subject, html, target }) });
+                showToast(res.message || 'Email berhasil dikirim!');
+                status.style.color = 'var(--success)';
+                status.textContent = res.message || 'Berhasil dikirim';
+              } catch(e) {
+                showToast(e.message, 'error');
+                status.style.color = 'var(--danger)';
+                status.textContent = 'Gagal: ' + e.message;
+              } finally {
+                bcSendBtn.disabled = false; bcSendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Email';
+              }
+            });
+          }
+        });
+
     </script>
 </body>
 
