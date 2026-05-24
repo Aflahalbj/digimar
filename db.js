@@ -17,7 +17,7 @@ const pool = mysql.createPool({
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 10000,
-  // timezone: '+07:00',
+  timezone: '+07:00', // WIB — penting agar CURDATE() & NOW() sesuai waktu Indonesia
   ssl: {
     rejectUnauthorized: true,
     ca: isVercel

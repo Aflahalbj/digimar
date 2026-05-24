@@ -3,6 +3,44 @@ DAICAST – Premium Diecast Collectibles
 Main JavaScript – Cart + WhatsApp Checkout
 =================================================== */
 
+
+// ─── BRAND CONFIG ──────────────────────────────────
+// Tambahkan assets/hotwheels.png untuk logo Hot Wheels yang asli
+// Untuk sekarang Hot Wheels pakai teks badge merah
+const BRAND_LOGOS = {
+  // Dengan spasi (format baru)
+  'Hot Wheels':  { logo: '/assets/images.png',   fallbackBg: '#e8001c', fallbackText: '#fff', height: 20 },
+  'Mini GT':     { logo: '/assets/minigt.png',   fallbackBg: '#0a0e18', fallbackText: '#fff', height: 18 },
+  'Matchbox':    { logo: '/assets/matchbox.png', fallbackBg: '#003a9b', fallbackText: '#fff', height: 22 },
+  'Tomica':      { logo: '/assets/tomica.png',   fallbackBg: '#cc0000', fallbackText: '#fff', height: 18 },
+  'Bburago':     { logo: '/assets/burago.png',   fallbackBg: '#333',    fallbackText: '#fff', height: 18 },
+  // Tanpa spasi (format DB lama)
+  'HotWheels':   { logo: '/assets/images.png',   fallbackBg: '#e8001c', fallbackText: '#fff', height: 20 },
+  'MiniGT':      { logo: '/assets/minigt.png',   fallbackBg: '#0a0e18', fallbackText: '#fff', height: 18 },
+  'MatchBox':    { logo: '/assets/matchbox.png', fallbackBg: '#003a9b', fallbackText: '#fff', height: 22 },
+};
+
+function brandLogosHTML(brands, height) {
+  if (!brands || !brands.length) return '';
+  return brands.map(b => {
+    let cfg = BRAND_LOGOS[b];
+    if (!cfg) {
+      const bNorm = b.replace(/\s+/g, '').toLowerCase();
+      const key = Object.keys(BRAND_LOGOS).find(k => k.replace(/\s+/g, '').toLowerCase() === bNorm);
+      if (key) cfg = BRAND_LOGOS[key];
+    }
+    if (!cfg) {
+      return '<span style="font-size:.68rem;font-weight:800;color:#94a3b8;padding:2px 6px;border:1px solid rgba(255,255,255,.15);border-radius:4px">' + b + '</span>';
+    }
+    const h = height || cfg.height;
+    return '<img src="' + cfg.logo + '" alt="' + b + '" title="' + b + '"' +
+      ' style="height:' + h + 'px;object-fit:contain;opacity:.95;vertical-align:middle;flex-shrink:0">';
+  }).join('');
+}
+
+function attachBrandLogoFallbacks() { /* noop - handled inline via onerror */ }
+
+
 // ─── WHATSAPP CONFIG ───────────────────────────────
 const WA_NUMBER = '6283138991304'; // ← Ganti dengan nomor WA toko
 
@@ -101,8 +139,11 @@ function renderCart() {
       el.className = 'cart-item';
       el.dataset.id = item.id;
       el.innerHTML = `
-        <div class="cart-item-img"><img src="${item.img}" alt="🚗" class="item-img"></div>
+        <div class="cart-item-img"><img src="${item.img || 'assets/ferrari_static.png'}" alt="🚗" class="item-img" onerror="this.src='assets/ferrari_static.png'"></div>
         <div class="cart-item-info">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;min-height:16px">
+            ${item.brand ? brandLogosHTML([item.brand], 13) : ''}
+          </div>
           <div class="cart-item-name">${item.name}</div>
           <div class="cart-item-price">${formatRupiah(item.price)}</div>
         </div>
@@ -115,6 +156,8 @@ function renderCart() {
       `;
       body.appendChild(el);
     });
+
+    attachBrandLogoFallbacks(body);
 
     // Qty/remove listeners
     body.querySelectorAll('.qty-inc').forEach(btn => {
@@ -136,7 +179,7 @@ function renderCart() {
 }
 
 // ─── CART POPUP (brand + qty) ──────────────────────
-function showCartPopup(id, name, price, img) {
+function showCartPopup(id, name, price, img, availableBrands, brandPricesStr) {
   const token = localStorage.getItem('token');
   if (!token) {
     showToast('Silakan daftar/login dulu ya!&nbsp;&nbsp;<i class="fa-solid fa-key" style="color: var(--gold);"></i>', '<i class="fa-solid fa-triangle-exclamation" style="color: var(--gold);"></i>');
@@ -173,11 +216,7 @@ function showCartPopup(id, name, price, img) {
       <h3>🛒 Tambah ke Keranjang</h3>
       <div class="popup-sub">${name.length > 38 ? name.slice(0,38)+'…' : name}</div>
       <span class="popup-label">Pilih Brand</span>
-      <div class="brand-grid">
-        <button class="brand-btn selected" data-brand="Hot Wheels">🔥 Hot Wheels</button>
-        <button class="brand-btn" data-brand="Mini GT">⭐ Mini GT</button>
-        <button class="brand-btn" data-brand="Matchbox">📦 Matchbox</button>
-      </div>
+      <div class="brand-grid" id="popupBrandGrid"></div>
       <span class="popup-label">Jumlah</span>
       <div class="qty-row">
         <button class="qty-ctrl" id="popupQtyDec">−</button>
@@ -191,8 +230,37 @@ function showCartPopup(id, name, price, img) {
     </div>
   `;
   document.body.appendChild(overlay);
+  if (brandPricesStr) overlay.dataset.brandPrices = brandPricesStr;
 
-  let selectedBrand = 'Hot Wheels';
+  // Populate brand buttons
+  const brands = (availableBrands && availableBrands.length) ? availableBrands : ['Hot Wheels'];
+  let selectedBrand = brands[0];
+  const brandGrid = document.getElementById('popupBrandGrid');
+  brands.forEach((b, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'brand-btn' + (i === 0 ? ' selected' : '');
+    btn.dataset.brand = b;
+    const cfg = BRAND_LOGOS[b];
+    if (cfg) {
+      const logoImg = document.createElement('img');
+      logoImg.src = cfg.logo;
+      logoImg.alt = b;
+      logoImg.style.cssText = `height:${cfg.height}px;object-fit:contain;opacity:.95;display:block;margin:0 auto 4px`;
+      logoImg.dataset.fbg = cfg.fallbackBg;
+      logoImg.dataset.fbt = cfg.fallbackText;
+      logoImg.dataset.fbl = b;
+      logoImg.className = 'brand-logo-img';
+      const label = document.createElement('span');
+      label.style.fontSize = '.75rem';
+      label.textContent = b;
+      btn.appendChild(logoImg);
+      btn.appendChild(label);
+    } else {
+      btn.textContent = b;
+    }
+    brandGrid.appendChild(btn);
+  });
+  attachBrandLogoFallbacks(brandGrid);
   let qty = 1;
 
   overlay.querySelectorAll('.brand-btn').forEach(btn => {
@@ -200,6 +268,7 @@ function showCartPopup(id, name, price, img) {
       overlay.querySelectorAll('.brand-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       selectedBrand = btn.dataset.brand;
+      if (typeof updatePopupPrice === 'function') updatePopupPrice();
     });
   });
   document.getElementById('popupQtyDec').addEventListener('click', () => {
@@ -211,9 +280,20 @@ function showCartPopup(id, name, price, img) {
   document.getElementById('popupCancel').addEventListener('click', () => overlay.remove());
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 
+  // Update price when brand is selected
+  function updatePopupPrice() {
+    const bp = (() => { try { return JSON.parse(overlay.dataset.brandPrices || 'null'); } catch { return null; } })();
+    if (bp && bp[selectedBrand]) {
+      const p = bp[selectedBrand].price;
+      overlay.querySelector('.popup-sub').textContent = (document.querySelector(`.product-card[id="${id}"] .product-name`)?.textContent || name.slice(0,38)) + ' · ' + formatRupiah(p);
+      overlay._price = p;
+    }
+  }
+
   document.getElementById('popupConfirm').addEventListener('click', () => {
+    const finalPrice = overlay._price || price;
     overlay.remove();
-    addToCart(id, name, price, img, selectedBrand, qty);
+    addToCart(id, name, finalPrice, img, selectedBrand, qty);
   });
   return true;
 }
@@ -229,6 +309,15 @@ function addToCart(id, name, price, img, brand = '', qty = 1) {
   updateBadge();
   renderCart();
   showToast(`${name.slice(0, 28)} (${brand || '-'}) x${qty} ditambahkan! 🎉`);
+  // Track cart_add event ke server analytics
+  const sid = sessionStorage.getItem('_sid');
+  if (sid) {
+    fetch('/api/analytics/product-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_id: id, event_type: 'cart_add', session_id: sid }),
+    }).catch(() => {});
+  }
   return true;
 }
 
@@ -265,8 +354,7 @@ function checkoutWhatsApp() {
   }
 
   const itemLines = cart.map(i =>
-    `  • ${i.name} (${i.qty}x) = 
-    ${formatRupiah(i.price * i.qty)}`
+    `  • ${i.name}${i.brand ? ' [' + i.brand + ']' : ''} (${i.qty}x) = ${formatRupiah(i.price * i.qty)}`
   ).join('\n');
 
   const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
@@ -307,8 +395,12 @@ function initCartButtons() {
       const name = card.dataset.name || card.querySelector('.product-name')?.textContent || 'Item';
       const price = parseInt(card.dataset.price || '0');
       const img = card.querySelector('.product-img')?.src;
+      let cardBrands = [];
+      try { cardBrands = JSON.parse(card.dataset.brands || '[]'); } catch { cardBrands = []; }
+      if (!cardBrands.length && card.dataset.brand) cardBrands = [card.dataset.brand];
+      const cardBrandPrices = card.dataset.brandPrices || null;
 
-      const added = showCartPopup(id, name, price, img);
+      const added = showCartPopup(id, name, price, img, cardBrands, cardBrandPrices);
       if (!added) return;
 
       // Flash the main button if it's the main one (not overlay)
@@ -542,6 +634,12 @@ async function fetchAndRenderProducts() {
     const response = await fetch('/api/products' + (params.toString() ? '?' + params.toString() : ''));
     if (!response.ok) throw new Error('Gagal memuat produk');
     const products = await response.json();
+    // Normalize brands: kalau kosong, bangun dari kolom brand (singular)
+    products.forEach(p => {
+      if (!Array.isArray(p.brands) || !p.brands.length) {
+        p.brands = p.brand ? [p.brand] : [];
+      }
+    });
 
     grid.innerHTML = '';
 
@@ -578,6 +676,8 @@ async function fetchAndRenderProducts() {
       card.dataset.name = p.name;
       card.dataset.price = p.price;
       card.dataset.emoji = p.emoji || '🏎️';
+      card.dataset.brands = JSON.stringify(p.brands || (p.brand ? [p.brand] : []));
+      card.dataset.brandPrices = p.brand_prices ? JSON.stringify(p.brand_prices) : '';
 
       card.innerHTML = `
         ${badgeHTML}
@@ -592,10 +692,18 @@ async function fetchAndRenderProducts() {
         </div>
         <div class="product-info">
           <div class="product-info-left">
-            <div class="product-brand">${p.brand || 'Unbranded'}</div>
+            <div class="product-brand" style="display:flex;align-items:center;flex-wrap:wrap;gap:5px;min-height:22px;max-width:100%">
+              ${(p.brands && p.brands.length) ? brandLogosHTML(p.brands, 16) : (p.brand ? `<span style="font-size:.75rem;font-weight:700;color:#94a3b8">${p.brand}</span>` : '')}
+            </div>
             <h3 class="product-name">${p.name}</h3>
             <div class="product-price-row">
-              <div class="product-price">${formatRp(p.price)}</div>
+              <div class="product-price">${(() => {
+                if (p.brand_prices && typeof p.brand_prices === 'object') {
+                  const prices = Object.values(p.brand_prices).map(v => parseInt(v.price)).filter(Boolean);
+                  if (prices.length > 1) return formatRp(Math.min(...prices)) + ' – ' + formatRp(Math.max(...prices));
+                }
+                return formatRp(p.price);
+              })()}</div>
               ${p.price_old ? `<div class="product-price-old">${formatRp(p.price_old)}</div>` : ''}
             </div>
           </div>
@@ -610,8 +718,7 @@ async function fetchAndRenderProducts() {
     });
 
     initCartButtons();
-
-    // Re-attach observer for animation
+    attachBrandLogoFallbacks(grid);
     const observer = new IntersectionObserver((entries, obs) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -949,16 +1056,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // ── Attach cart tracking ──────────────────────────────
-  // Intercept addToCart calls — hook ke event delegation
-  document.addEventListener('click', e => {
-    const btn = e.target.closest('.add-to-cart-btn');
-    if (!btn) return;
-    const card = btn.closest('.product-card[id]');
-    if (!card) return;
-    // Tunggu sebentar agar cart logic jalan dulu
-    setTimeout(() => trackProductEvent(card.id, 'cart_add'), 100);
-  });
+  // cart_add tracking sudah dipindah langsung ke fungsi addToCart
 
   // ── Init ──────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', () => {

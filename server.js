@@ -26,6 +26,22 @@ async function sendMail({ to, subject, html }) {
 }
 
 
+// Brand normalize helper
+const BRAND_NORMALIZE = {
+  'hotwheels': 'Hot Wheels', 'hot wheels': 'Hot Wheels',
+  'minigt': 'Mini GT', 'mini gt': 'Mini GT',
+  'matchbox': 'Matchbox', 'tomica': 'Tomica',
+  'bburago': 'Bburago', 'burago': 'Bburago',
+};
+function normalizeBrand(b) {
+  if (!b || typeof b !== 'string') return b;
+  return BRAND_NORMALIZE[b.toLowerCase().replace(/\s+/g, '')] ||
+         BRAND_NORMALIZE[b.toLowerCase()] || b;
+}
+function normalizeBrands(arr) {
+  return Array.isArray(arr) ? arr.map(normalizeBrand).filter(Boolean) : [];
+}
+
 const app = express();
 
 // ─── CORS ─────────────────────────────────────────────
@@ -192,8 +208,9 @@ app.get('/api/cart', authenticateToken, async (req, res) => {
       c.product_id as id, 
       c.product_name as name, 
       c.price, 
+      c.brand,
       p.img,
-      c.qty 
+      c.qty
       FROM cart c
       LEFT JOIN products p ON c.product_id = p.id
       WHERE c.user_id = ?`, 
@@ -232,16 +249,25 @@ app.post('/api/cart/sync', authenticateToken, async (req, res) => {
       }
     }
 
+    // Deduplicate: merge same product_id+brand combinations
+    const merged = [];
+    for (const item of cart) {
+      const key = item.id + '|' + (item.brand || '');
+      const existing = merged.find(i => i._key === key);
+      if (existing) { existing.qty += item.qty; }
+      else { merged.push({ ...item, _key: key }); }
+    }
+
     await connection.beginTransaction();
 
     // Clear existing cart
     await connection.execute('DELETE FROM cart WHERE user_id = ?', [req.user.id]);
 
     // Insert new cart items
-    if (cart.length > 0) {
-      const values = cart.map(item => [req.user.id, item.id, item.name, item.price, item.emoji || '🚗', item.qty]);
+    if (merged.length > 0) {
+      const values = merged.map(item => [req.user.id, item.id, item.name, item.price, item.brand || '', item.qty]);
       await connection.query(
-        'INSERT INTO cart (user_id, product_id, product_name, price, emoji, qty) VALUES ?',
+        'INSERT INTO cart (user_id, product_id, product_name, price, brand, qty) VALUES ?',
         [values]
       );
     }
@@ -311,7 +337,13 @@ app.get('/api/products', async (req, res) => {
     if (price_max) { query += ' AND price <= ?'; params.push(parseInt(price_max)); }
     query += ' ORDER BY sort_order ASC, created_at DESC';
     const [rows] = await db.execute(query, params);
-    res.json(rows);
+    // Parse brands JSON field
+    const products = rows.map(r => ({
+      ...r,
+      brands: (() => { try { const b = Array.isArray(r.brands) ? r.brands : JSON.parse(r.brands || '[]'); return normalizeBrands(b); } catch { return []; } })(),
+      brand_prices: (() => { try { if (!r.brand_prices) return null; return typeof r.brand_prices === 'object' ? r.brand_prices : JSON.parse(r.brand_prices); } catch { return null; } })()
+    }));
+    res.json(products);
   } catch (e) {
     res.status(500).json({ error: 'Gagal mengambil produk.' });
   }
@@ -360,11 +392,29 @@ app.get('/products/:id', async (req, res) => {
 // ─── PRODUCTS CRUD (admin only) ───────────────────────
 app.post('/api/admin/products', authenticateAdmin, async (req, res) => {
   try {
-    const { id, name, brand, category, price, price_old, emoji, badge, img, model_path, scale, stock } = req.body;
-    if (!id || !name || !brand || !category || !price) return res.status(400).json({ error: 'Field wajib: id, name, brand, category, price.' });
+    const { id, name, brand, brands, category, price, price_old, badge, img, model_path, stock } = req.body;
+    if (!id || !name || !category || !price) return res.status(400).json({ error: 'Field wajib: id, name, category, price.' });
+    const brandsJson = JSON.stringify(Array.isArray(brands) ? brands : (brand ? [brand] : []));
+    const primaryBrand = Array.isArray(brands) && brands.length ? brands[0] : (brand || '');
+    // Build brand_prices JSON from submitted data
+    const brandPricesInput = req.body.brand_prices;
+    let brandPricesJson = null;
+    if (brandPricesInput && typeof brandPricesInput === 'object') {
+      brandPricesJson = JSON.stringify(brandPricesInput);
+    } else if (primaryBrand && price) {
+      brandPricesJson = JSON.stringify({ [primaryBrand]: { price: parseInt(price), price_old: price_old ? parseInt(price_old) : null } });
+    }
+    // Compute price range
+    let finalPrice = parseInt(price);
+    let finalPriceOld = price_old ? parseInt(price_old) : null;
+    if (brandPricesInput && typeof brandPricesInput === 'object') {
+      const prices = Object.values(brandPricesInput).map(v => parseInt(v.price)).filter(Boolean);
+      const oldPrices = Object.values(brandPricesInput).map(v => parseInt(v.price_old)).filter(Boolean);
+      if (prices.length) { finalPrice = Math.min(...prices); finalPriceOld = oldPrices.length ? Math.max(...oldPrices) : null; }
+    }
     await db.execute(
-      'INSERT INTO products (id, name, brand, category, price, price_old, emoji, badge, img, model_path, scale, stock) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [id, name, brand, category, price, price_old || null, emoji || '🏎️', badge || 'new', img || 'assets/ferrari_static.png', req.body.model_3d || model_path || null, scale || '1:64', stock ?? 99]
+      'INSERT INTO products (id, name, brand, brands, category, price, price_old, badge, img, model_path, stock, brand_prices) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [id, name, primaryBrand, brandsJson, category, finalPrice, finalPriceOld, badge || 'new', img || 'assets/ferrari_static.png', req.body.model_3d || model_path || null, stock ?? 99, brandPricesJson]
     );
     res.status(201).json({ message: 'Produk berhasil ditambahkan.' });
   } catch (e) {
@@ -375,10 +425,26 @@ app.post('/api/admin/products', authenticateAdmin, async (req, res) => {
 
 app.put('/api/admin/products/:id', authenticateAdmin, async (req, res) => {
   try {
-    const { name, brand, category, price, price_old, emoji, badge, img, model_path, scale, stock, is_active } = req.body;
+    const { name, brand, brands, category, price, price_old, badge, img, model_path, stock, is_active } = req.body;
+    const brandsJson = JSON.stringify(Array.isArray(brands) ? brands : (brand ? [brand] : []));
+    const primaryBrand = Array.isArray(brands) && brands.length ? brands[0] : (brand || '');
+    const brandPricesInput2 = req.body.brand_prices;
+    let brandPricesJson2 = null;
+    if (brandPricesInput2 && typeof brandPricesInput2 === 'object') {
+      brandPricesJson2 = JSON.stringify(brandPricesInput2);
+    } else if (primaryBrand && price) {
+      brandPricesJson2 = JSON.stringify({ [primaryBrand]: { price: parseInt(price), price_old: price_old ? parseInt(price_old) : null } });
+    }
+    let finalPrice2 = parseInt(price);
+    let finalPriceOld2 = price_old ? parseInt(price_old) : null;
+    if (brandPricesInput2 && typeof brandPricesInput2 === 'object') {
+      const prices2 = Object.values(brandPricesInput2).map(v => parseInt(v.price)).filter(Boolean);
+      const oldPrices2 = Object.values(brandPricesInput2).map(v => parseInt(v.price_old)).filter(Boolean);
+      if (prices2.length) { finalPrice2 = Math.min(...prices2); finalPriceOld2 = oldPrices2.length ? Math.max(...oldPrices2) : null; }
+    }
     await db.execute(
-      'UPDATE products SET name=?, brand=?, category=?, price=?, price_old=?, emoji=?, badge=?, img=?, model_path=?, scale=?, stock=?, is_active=?, updated_at=NOW() WHERE id=?',
-      [name, brand, category, price, price_old || null, emoji || '🏎️', badge || 'new', img || 'assets/ferrari_static.png', req.body.model_3d || model_path || null, scale || '1:64', stock ?? 99, is_active ?? 1, req.params.id]
+      'UPDATE products SET name=?, brand=?, brands=?, category=?, price=?, price_old=?, badge=?, img=?, model_path=?, stock=?, is_active=?, brand_prices=?, updated_at=NOW() WHERE id=?',
+      [name, primaryBrand, brandsJson, category, finalPrice2, finalPriceOld2, badge || 'new', img || 'assets/ferrari_static.png', req.body.model_3d || model_path || null, stock ?? 99, is_active ?? 1, brandPricesJson2, req.params.id]
     );
     res.json({ message: 'Produk berhasil diupdate.' });
   } catch (e) {
@@ -466,11 +532,15 @@ app.get('/api/admin/analytics/overview', authenticateAdmin, async (req, res) => 
     const [[{ total_pageviews }]] = await db.execute(
       'SELECT COUNT(*) as total_pageviews FROM page_views WHERE created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)', [days]);
     const [[{ avg_duration }]] = await db.execute(
-      'SELECT ROUND(AVG(duration_sec)) as avg_duration FROM sessions WHERE duration_sec IS NOT NULL AND created_at >= DATE_SUB(NOW(), INTERVAL ? DAY)', [days]);
+      `SELECT ROUND(AVG(duration_sec)) as avg_duration FROM sessions 
+       WHERE duration_sec IS NOT NULL AND duration_sec > 0 AND duration_sec < 86400
+       AND CONVERT_TZ(created_at, '+00:00', '+07:00') >= DATE_SUB(CONVERT_TZ(NOW(), '+00:00', '+07:00'), INTERVAL ? DAY)`, [days]);
     const [[{ total_products }]] = await db.execute('SELECT COUNT(*) as total_products FROM products WHERE is_active = 1');
     const [[{ total_users }]] = await db.execute('SELECT COUNT(*) as total_users FROM users');
     const [[{ cart_adds_today }]] = await db.execute(
-      `SELECT COUNT(*) as cart_adds_today FROM product_events WHERE event_type = 'cart_add' AND DATE(created_at) = CURDATE()`);
+      `SELECT COUNT(*) as cart_adds_today FROM product_events 
+        WHERE event_type = 'cart_add' 
+        AND DATE(CONVERT_TZ(created_at, '+00:00', '+07:00')) = CURDATE()`);
     res.json({ total_visitors, total_pageviews, avg_duration: avg_duration || 0, total_products, total_users, cart_adds_today });
   } catch (e) {
     console.error(e);
@@ -532,7 +602,12 @@ app.get('/api/admin/analytics/pages', authenticateAdmin, async (req, res) => {
 app.get('/api/admin/products', authenticateAdmin, async (req, res) => {
   try {
     const [rows] = await db.execute('SELECT * FROM products ORDER BY created_at DESC');
-    res.json(rows);
+    const products = rows.map(r => ({
+      ...r,
+      brands: (() => { try { const b = Array.isArray(r.brands) ? r.brands : JSON.parse(r.brands || '[]'); return normalizeBrands(b); } catch { return []; } })(),
+      brand_prices: (() => { try { if (!r.brand_prices) return null; return typeof r.brand_prices === 'object' ? r.brand_prices : JSON.parse(r.brand_prices); } catch { return null; } })()
+    }));
+    res.json(products);
   } catch (e) {
     res.status(500).json({ error: 'Gagal mengambil produk.' });
   }

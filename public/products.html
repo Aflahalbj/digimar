@@ -1167,10 +1167,28 @@
            RENDER
         ───────────────────────────────────────────────────── */
         function renderCard(p, isListView) {
+            // Hitung display harga: range jika brand_prices punya beberapa harga
+            let priceDisplay = fmt(p.price);
+            if (p.brandPrices && typeof p.brandPrices === 'object') {
+                const prices = Object.values(p.brandPrices).map(v => parseInt(v.price)).filter(Boolean);
+                if (prices.length > 1) priceDisplay = fmt(Math.min(...prices)) + ' – ' + fmt(Math.max(...prices));
+                else if (prices.length === 1) priceDisplay = fmt(prices[0]);
+            }
+
+            // Brand logo HTML (pakai fungsi dari script.js)
+            const brandHTML = (typeof brandLogosHTML === 'function' && p.brands && p.brands.length)
+                ? brandLogosHTML(p.brands, 16)
+                : `<span style="font-size:.75rem;font-weight:700;color:#94a3b8">${p.brand}</span>`;
+
+            const brandsAttr = JSON.stringify(p.brands || []).replace(/"/g, '&quot;');
+            const brandPricesAttr = p.brandPrices ? JSON.stringify(p.brandPrices).replace(/"/g, '&quot;') : '';
+
             return `
       <div class="product-card fade-up" data-category="${p.category}" id="${p.id}"
         data-name="${p.name}" data-price="${p.price}" data-emoji="${p.emoji}"
-        data-brand="${p.brand.toLowerCase()}" data-badge="${p.badge}">
+        data-brand="${p.brand.toLowerCase()}" data-badge="${p.badge}"
+        data-brands="${brandsAttr}"
+        data-brand-prices="${brandPricesAttr}">
         <div class="product-badge ${p.badgeClass}">${p.badgeLabel}</div>
         <div class="product-img-wrap"
           onmouseenter="aktifkan3D(this)" onmouseleave="matikan3D(this)"
@@ -1183,11 +1201,13 @@
         </div>
         <div class="product-info">
           <div class="product-info-left">
-            <div class="product-brand">${p.brand}</div>
+            <div class="product-brand" style="display:flex;align-items:center;flex-wrap:wrap;gap:5px;min-height:22px;max-width:100%">
+              ${brandHTML}
+            </div>
             <h4 class="product-name">${p.name}</h4>
             <div class="product-price-row">
-              <div class="product-price">${fmt(p.price)}</div>
-              <div class="product-price-old">${fmt(p.priceOld)}</div>
+              <div class="product-price">${priceDisplay}</div>
+              ${p.priceOld ? `<div class="product-price-old">${fmt(p.priceOld)}</div>` : ''}
             </div>
           </div>
           ${isListView ? `
@@ -1237,6 +1257,8 @@
 
                 // Re-init add-to-cart buttons
                 if (typeof initCartButtons === 'function') initCartButtons();
+                // Attach brand logo fallbacks setelah render
+                if (typeof attachBrandLogoFallbacks === 'function') attachBrandLogoFallbacks(grid);
             }
 
             // Results info
@@ -1344,6 +1366,16 @@
                         id: p.id,
                         name: p.name,
                         brand: p.brand || 'Unbranded',
+                        brands: (() => {
+                            if (Array.isArray(p.brands) && p.brands.length) return p.brands;
+                            if (typeof p.brands === 'string') { try { const a = JSON.parse(p.brands); if (Array.isArray(a) && a.length) return a; } catch(e){} }
+                            return p.brand ? [p.brand] : [];
+                        })(),
+                        brandPrices: (() => {
+                            if (p.brand_prices && typeof p.brand_prices === 'object') return p.brand_prices;
+                            if (typeof p.brand_prices === 'string') { try { return JSON.parse(p.brand_prices); } catch(e){} }
+                            return null;
+                        })(),
                         category: p.category || 'all',
                         price: p.price,
                         priceOld: p.price_old,
@@ -1357,6 +1389,8 @@
                         tags: [p.category || 'all', (p.brand || '').toLowerCase()],
                         newest: p.badge && p.badge.toLowerCase() === 'new'
                     }));
+                    // Render segera setelah data masuk
+                    render();
                 }
             } catch (e) {
                 console.error("Error fetching products:", e);

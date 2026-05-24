@@ -393,6 +393,11 @@
             display: block;
         }
 
+        #page-broadcast.active {
+            display: flex;
+            justify-content: center;
+        }
+
         /* ── STAT CARDS ─────────────────────────────────── */
         .stats-grid {
             display: grid;
@@ -1477,7 +1482,7 @@
 
             <!-- PAGE: BROADCAST EMAIL -->
             <div class="page" id="page-broadcast">
-              <div style="max-width:680px">
+              <div style="max-width:680px;width:100%">
                 <div class="chart-card" style="margin-bottom:20px">
                   <div class="chart-header" style="margin-bottom:20px">
                     <div>
@@ -1519,8 +1524,13 @@
                     <input class="form-input" id="bcSubject" placeholder="🔥 Promo Akhir Tahun – Diskon s/d 40%!">
                   </div>
                   <div class="form-group">
-                    <label class="form-label">Isi Pesan (HTML dibolehkan) *</label>
-                    <textarea class="form-input" id="bcBody" rows="10" placeholder="<h2>Halo Sobat Diecast! 🏎️</h2>&#10;<p>Ada promo spesial...</p>" style="resize:vertical;min-height:180px;font-family:monospace;font-size:0.82rem"></textarea>
+                    <label class="form-label" style="display:flex;justify-content:space-between;align-items:center">
+                      <span>Isi Pesan (HTML) *</span>
+                      <button type="button" onclick="insertEmailTemplate()" style="font-size:.75rem;padding:4px 10px;background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.4);color:var(--primary);border-radius:6px;cursor:pointer;font-family:'Outfit',sans-serif">
+                        📋 Pakai Template
+                      </button>
+                    </label>
+                    <textarea class="form-input" id="bcBody" rows="16" placeholder="<h2>Halo Sobat Diecast! 🏎️</h2>&#10;<p>Ada promo spesial...</p>" style="resize:vertical;min-height:220px;font-family:monospace;font-size:0.8rem;tab-size:2"></textarea>
                   </div>
                   <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
                     <button class="btn-save" id="bcPreviewBtn" style="background:none;border:1.5px solid var(--accent);color:var(--accent);box-shadow:none">
@@ -1557,11 +1567,18 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label class="form-label">ID Produk *</label>
-                        <input class="form-input" id="fId" placeholder="card9" required>
+                        <input class="form-input" id="fId" placeholder="card9">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Brand *</label>
-                        <input class="form-input" id="fBrand" placeholder="Ferrari" required>
+                        <label class="form-label">Brand (pilih 1-3) *</label>
+                        <div id="brandCheckGrid" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+                          <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer"><input type="checkbox" class="brand-check" value="Hot Wheels"> Hot Wheels</label>
+                          <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer"><input type="checkbox" class="brand-check" value="Mini GT"> Mini GT</label>
+                          <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer"><input type="checkbox" class="brand-check" value="Matchbox"> Matchbox</label>
+                          <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer"><input type="checkbox" class="brand-check" value="Tomica"> Tomica</label>
+                          <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer"><input type="checkbox" class="brand-check" value="Bburago"> Bburago</label>
+                        </div>
+                        <input type="hidden" id="fBrand">
                     </div>
                 </div>
                 <div class="form-group">
@@ -1578,20 +1595,17 @@
                             <option value="limited">Limited Edition</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Skala</label>
-                        <select class="form-select" id="fScale">
-                            <option value="1:18">1:18</option>
-                            <option value="1:24">1:24</option>
-                            <option value="1:43">1:43</option>
-                            <option value="1:64" selected>1:64</option>
-                        </select>
-                    </div>
+
                 </div>
-                <div class="form-row">
+<div class="form-group" id="brandPriceSection" style="display:none">
+                    <label class="form-label">Harga per Brand</label>
+                    <div id="brandPriceRows" style="display:flex;flex-direction:column;gap:8px"></div>
+                    <p style="font-size:.75rem;color:var(--text-muted);margin-top:6px">💡 Harga pertama (brand teratas) = harga utama produk. Range otomatis dihitung dari harga terendah–tertinggi.</p>
+                </div>
+                <div class="form-row" id="singlePriceRow">
                     <div class="form-group">
                         <label class="form-label">Harga (Rp) *</label>
-                        <input class="form-input" id="fPrice" type="number" placeholder="850000" required>
+                        <input class="form-input" id="fPrice" type="number" placeholder="850000">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Harga Coret (Rp)</label>
@@ -1608,10 +1622,7 @@
                             <option value="sale">🏷️ Sale</option>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Emoji</label>
-                        <input class="form-input" id="fEmoji" placeholder="🏎️" value="🏎️">
-                    </div>
+
                 </div>
                 <div class="form-group">
                     <label class="form-label">Path Gambar *</label>
@@ -1793,6 +1804,22 @@
             }
         }
 
+
+        const BRAND_NORMALIZE_CLIENT = {
+          'hotwheels': 'Hot Wheels', 'hot wheels': 'Hot Wheels',
+          'minigt': 'Mini GT', 'mini gt': 'Mini GT',
+          'matchbox': 'Matchbox', 'tomica': 'Tomica',
+          'bburago': 'Bburago', 'burago': 'Bburago',
+        };
+        function normalizeBrand(b) {
+          if (!b) return b;
+          return BRAND_NORMALIZE_CLIENT[b.toLowerCase().replace(/\s+/g,'')]
+              || BRAND_NORMALIZE_CLIENT[b.toLowerCase()] || b;
+        }
+        function normalizeBrands(arr) {
+          return Array.isArray(arr) ? arr.map(normalizeBrand) : [];
+        }
+
         async function fetchOverview() {
             const [overview, visits, topCart, topHover] = await Promise.all([
                 api('/admin/analytics/overview?range=' + currentRange),
@@ -1839,9 +1866,20 @@
         }
 
         async function fetchProductsCRUD() {
-            const products = await api('/admin/products');
-            allProducts = products;
-            renderProductsTable(products);
+            const raw = await api('/admin/products');
+            allProducts = raw.map(p => ({
+                ...p,
+                brands: normalizeBrands(
+                    Array.isArray(p.brands) && p.brands.length ? p.brands : (p.brand ? [p.brand] : [])
+                ),
+                brand_prices: (() => {
+                    if (!p.brand_prices || typeof p.brand_prices !== 'object') return null;
+                    const out = {};
+                    Object.entries(p.brand_prices).forEach(([k, v]) => { out[normalizeBrand(k)] = v; });
+                    return out;
+                })(),
+            }));
+            renderProductsTable(allProducts);
         }
 
         let allUsers = [];
@@ -1993,16 +2031,24 @@
     <tr>
       <td>
         <div style="display:flex;align-items:center;gap:12px">
-          <div class="prod-img-placeholder">${p.emoji || '🏎️'}</div>
+          <div class="prod-img-placeholder" style="overflow:hidden;border-radius:6px;background:#111"><img src="${p.img || 'assets/ferrari_static.png'}" style="width:100%;height:100%;object-fit:cover" onerror="this.src='assets/ferrari_static.png'"></div>
           <div>
             <div style="font-weight:600;font-size:0.88rem;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
-            <div style="color:var(--text-muted);font-size:0.75rem">${p.brand} · ${p.scale || '1:64'}</div>
+            <div style="color:var(--text-muted);font-size:0.75rem">${p.brand || ''}</div>
           </div>
         </div>
       </td>
       <td><span style="text-transform:capitalize;color:var(--text-secondary);font-size:0.85rem">${p.category}</span></td>
       <td>
-        <div style="font-weight:700;color:var(--primary);font-size:0.88rem">${fmt(p.price)}</div>
+        <div style="font-weight:700;color:var(--primary);font-size:0.88rem">
+          ${(() => {
+            if (p.brand_prices && typeof p.brand_prices === 'object') {
+              const prices = Object.values(p.brand_prices).map(v => v.price).filter(Boolean);
+              if (prices.length > 1) return fmt(Math.min(...prices)) + ' – ' + fmt(Math.max(...prices));
+            }
+            return fmt(p.price);
+          })()}
+        </div>
         ${p.price_old ? `<div style="color:var(--text-muted);text-decoration:line-through;font-size:0.75rem">${fmt(p.price_old)}</div>` : ''}
       </td>
       <td><span class="badge-pill ${BADGE[p.badge] || 'pill-new'}">${p.badge_label || p.badge}</span></td>
@@ -2025,30 +2071,81 @@
             document.getElementById('prodIsEdit').value = '0';
             document.getElementById('productForm').reset();
             document.getElementById('fId').disabled = false;
-            document.getElementById('fEmoji').value = '🏎️';
-            document.getElementById('fScale').value = '1:64';
+
             document.getElementById('fOrder').value = '0';
             openModal('productModal');
+        }
+
+        function resetModalBrandState() {
+            document.querySelectorAll('.brand-check').forEach(cb => cb.checked = false);
+            document.getElementById('brandPriceRows').innerHTML = '';
+            document.getElementById('brandPriceSection').style.display = 'none';
+            document.getElementById('singlePriceRow').style.display = '';
+            document.getElementById('fPrice').value = '';
+            document.getElementById('fPriceOld').value = '';
         }
 
         function openEditModal(id) {
             const p = allProducts.find(x => x.id === id);
             if (!p) return;
+
+            // Bersihkan state produk sebelumnya
+            resetModalBrandState();
+
             document.getElementById('modalTitle').textContent = 'Edit Produk';
             document.getElementById('prodIsEdit').value = '1';
             document.getElementById('fId').value = p.id;
             document.getElementById('fId').disabled = true;
             document.getElementById('fName').value = p.name;
-            document.getElementById('fBrand').value = p.brand;
+            document.getElementById('fBrand').value = p.brand || '';
             document.getElementById('fCategory').value = p.category;
-            document.getElementById('fScale').value = p.scale || '1:64';
-            document.getElementById('fPrice').value = p.price;
-            document.getElementById('fPriceOld').value = p.price_old || '';
-            document.getElementById('fBadge').value = p.badge;
-            document.getElementById('fEmoji').value = p.emoji || '🏎️';
-            document.getElementById('fImg').value = p.img;
+            document.getElementById('fBadge').value = p.badge || 'new';
+            document.getElementById('fImg').value = p.img || '';
             document.getElementById('fModel').value = p.model_path || '';
             document.getElementById('fOrder').value = p.sort_order || 0;
+
+            // Restore brand checkboxes
+            const editBrands = Array.isArray(p.brands) && p.brands.length
+                ? p.brands
+                : (p.brand ? [p.brand] : []);
+            const normStr = str => str.replace(/\s+/g, '').toLowerCase();
+            document.querySelectorAll('.brand-check').forEach(cb => {
+                cb.checked = editBrands.some(b => normStr(b) === normStr(cb.value));
+            });
+
+            // Rebuild price rows berdasarkan checkbox yang tercentang
+            updateBrandPriceUI();
+
+            // Restore harga dari brand_prices (jika ada) atau fallback ke p.price
+            const bp = (p.brand_prices && typeof p.brand_prices === 'object' && Object.keys(p.brand_prices).length)
+                ? p.brand_prices : null;
+            const normStr2 = s => s.replace(/\s+/g,'').toLowerCase();
+            if (editBrands.length > 1) {
+                // Multi-brand: cari harga dari bp dengan fuzzy match, fallback ke p.price
+                editBrands.forEach(brand => {
+                    const inp = document.querySelector(`#brandPriceRows input[data-brand="${brand}"]`);
+                    const inpOld = document.querySelector(`#brandPriceRows input[data-brand-old="${brand}"]`);
+                    if (bp) {
+                        // Fuzzy match key di bp
+                        const bpKey = Object.keys(bp).find(k => normStr2(k) === normStr2(brand));
+                        if (bpKey) {
+                            if (inp) inp.value = bp[bpKey].price || '';
+                            if (inpOld) inpOld.value = bp[bpKey].price_old || '';
+                            return;
+                        }
+                    }
+                    // Fallback: isi dari p.price
+                    if (inp) inp.value = p.price || '';
+                    if (inpOld) inpOld.value = p.price_old || '';
+                });
+            } else {
+                // Single brand
+                const bpKey = bp ? Object.keys(bp).find(k => normStr2(k) === normStr2(editBrands[0] || '')) : null;
+                const singlePrice = bpKey ? bp[bpKey] : null;
+                document.getElementById('fPrice').value = singlePrice ? (singlePrice.price || '') : (p.price || '');
+                document.getElementById('fPriceOld').value = singlePrice ? (singlePrice.price_old || '') : (p.price_old || '');
+            }
+
             openModal('productModal');
         }
 
@@ -2070,24 +2167,44 @@
         async function submitProduct(e) {
             e.preventDefault();
             const isEdit = document.getElementById('prodIsEdit').value === '1';
-            const id = document.getElementById('fId').value.trim();
+            // fId bisa disabled saat edit, fallback ke prodId hidden field
+            const id = (document.getElementById('fId').value || document.getElementById('prodId').value).trim();
             const badge = document.getElementById('fBadge').value;
             const BADGE_LABELS = { hot: '🔥 Hot', new: '✨ New', limited: '⭐ Limited', sale: '🏷️ Sale' };
             const BADGE_CLASSES = { hot: 'badge-hot', new: 'badge-new', limited: 'badge-limited', sale: 'badge-sale' };
 
+            // Kumpulkan brand yang dicentang
+            const selectedBrands = [...document.querySelectorAll('.brand-check:checked')].map(cb => cb.value);
+            if (!selectedBrands.length) { showToast('Pilih minimal 1 brand!', 'error'); return; }
+            const primaryBrand = selectedBrands[0];
+
             const payload = {
                 id, name: document.getElementById('fName').value.trim(),
-                brand: document.getElementById('fBrand').value.trim(),
+                brand: primaryBrand,
                 category: document.getElementById('fCategory').value,
-                scale: document.getElementById('fScale').value,
-                price: parseInt(document.getElementById('fPrice').value),
+                price: parseInt(document.getElementById('fPrice').value) || 0,
                 price_old: document.getElementById('fPriceOld').value ? parseInt(document.getElementById('fPriceOld').value) : null,
                 badge, badge_label: BADGE_LABELS[badge], badge_class: BADGE_CLASSES[badge],
-                emoji: document.getElementById('fEmoji').value || '🏎️',
                 img: document.getElementById('fImg').value.trim(),
-                model_3d: document.getElementById('fModel').value.trim() || null,
+                model_path: document.getElementById('fModel').value.trim() || null,
                 sort_order: parseInt(document.getElementById('fOrder').value) || 0,
                 is_active: 1,
+                brands: selectedBrands,
+                brand_prices: (() => {
+                  const bp = {};
+                  document.querySelectorAll('#brandPriceRows input[data-brand]').forEach(inp => {
+                    const b = inp.dataset.brand;
+                    const oldInp = document.querySelector(`#brandPriceRows input[data-brand-old="${b}"]`);
+                    bp[b] = { price: parseInt(inp.value) || 0, price_old: oldInp && oldInp.value ? parseInt(oldInp.value) : null };
+                  });
+                  // Jika tidak ada multi-brand rows, buat dari single price
+                  if (!Object.keys(bp).length) {
+                    const singlePrice = parseInt(document.getElementById('fPrice').value);
+                    const singleOld = document.getElementById('fPriceOld').value ? parseInt(document.getElementById('fPriceOld').value) : null;
+                    if (singlePrice && selectedBrands[0]) bp[selectedBrands[0]] = { price: singlePrice, price_old: singleOld };
+                  }
+                  return Object.keys(bp).length ? bp : null;
+                })(),
             };
 
             const btn = document.getElementById('btnSave');
@@ -2239,6 +2356,116 @@
             });
           }
         });
+
+    
+        /* ── BRAND PRICE ROWS ────────────────────────────── */
+        function updateBrandPriceUI() {
+          const checked = [...document.querySelectorAll('.brand-check:checked')].map(cb => cb.value);
+          const section = document.getElementById('brandPriceSection');
+          const singleRow = document.getElementById('singlePriceRow');
+          const rows = document.getElementById('brandPriceRows');
+
+          if (checked.length > 1) {
+            section.style.display = 'block';
+            singleRow.style.display = 'none';
+            // Simpan nilai existing sebelum rebuild
+            const savedVals = {};
+            rows.querySelectorAll('input[data-brand]').forEach(inp => { savedVals[inp.dataset.brand] = inp.value; });
+            rows.querySelectorAll('input[data-brand-old]').forEach(inp => { savedVals['old_' + inp.dataset.brandOld] = inp.value; });
+            rows.innerHTML = checked.map(b => {
+              const val = savedVals[b] || '';
+              const valOld = savedVals['old_' + b] || '';
+              return `<div style="display:grid;grid-template-columns:auto 1fr 1fr;align-items:center;gap:10px;background:rgba(0,0,0,.2);padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.06)">
+                <span style="font-size:.8rem;font-weight:700;color:#f8fafc;min-width:90px">${b}</span>
+                <div>
+                  <input class="form-input" data-brand="${b}" type="number" placeholder="Harga" value="${val}" style="margin:0">
+                </div>
+                <div>
+                  <input class="form-input" data-brand-old="${b}" type="number" placeholder="Harga Coret" value="${valOld}" style="margin:0">
+                </div>
+              </div>`;
+            }).join('');
+          } else {
+            section.style.display = 'none';
+            singleRow.style.display = '';
+          }
+        }
+
+        // Attach listener to all brand checkboxes
+        document.addEventListener('change', e => {
+          if (e.target.classList.contains('brand-check')) updateBrandPriceUI();
+        });
+
+        /* ── EMAIL TEMPLATE ──────────────────────────────── */
+        function insertEmailTemplate() {
+          const subject = document.getElementById('bcSubject').value || 'Promo Spesial Diecastku';
+          const template = `<!DOCTYPE html>
+<html lang="id">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#0a0e18;font-family:'Helvetica Neue',Arial,sans-serif">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0e18;padding:32px 16px">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#0d1117;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.08)">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#f97316,#ea580c);padding:28px 32px;text-align:center">
+            <h1 style="margin:0;color:#fff;font-size:26px;font-weight:900;letter-spacing:2px">🏎️ DIECASTKU</h1>
+            <p style="margin:8px 0 0;color:rgba(255,255,255,.85);font-size:13px">Premium Diecast Collectibles</p>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:32px">
+            <h2 style="color:#f97316;font-size:20px;margin:0 0 12px">✨ Halo Sobat Diecast!</h2>
+            <p style="color:#cbd5e1;font-size:15px;line-height:1.7;margin:0 0 20px">
+              Ada kabar gembira buat kamu! Kami punya <strong style="color:#f8fafc">penawaran spesial</strong> yang sayang banget dilewatin.
+            </p>
+
+            <!-- Promo Box -->
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="background:linear-gradient(135deg,rgba(249,115,22,.12),rgba(234,88,12,.06));border:1px solid rgba(249,115,22,.3);border-radius:12px;padding:20px">
+                  <h3 style="margin:0 0 8px;color:#f97316;font-size:18px">🔥 [JUDUL PROMO KAMU]</h3>
+                  <p style="margin:0;color:#e2e8f0;font-size:14px;line-height:1.6">
+                    Tulis detail promo di sini. Misal: <strong>Diskon 30%</strong> untuk semua produk Hot Wheels s/d tanggal XX/XX/XXXX.
+                  </p>
+                </td>
+              </tr>
+            </table>
+
+            <p style="color:#94a3b8;font-size:14px;line-height:1.6;margin:20px 0">
+              Jangan sampai ketinggalan stok terbatas ya! Hubungi kami via WhatsApp untuk info lebih lanjut.
+            </p>
+
+            <!-- CTA Button -->
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td align="center" style="padding:8px 0 24px">
+                  <a href="https://diecastku.vercel.app" style="display:inline-block;padding:14px 36px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;text-decoration:none;border-radius:10px;font-weight:800;font-size:15px;letter-spacing:.5px">Lihat Koleksi Terbaru →</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:rgba(0,0,0,.3);padding:20px 32px;text-align:center;border-top:1px solid rgba(255,255,255,.06)">
+            <p style="margin:0;color:#475569;font-size:12px">© 2025 Diecastku · Kamu menerima email ini karena berlangganan newsletter kami.</p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+          document.getElementById('bcBody').value = template;
+          document.getElementById('bcPreviewPane').style.display = 'none';
+        }
+
 
     </script>
 </body>
