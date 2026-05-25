@@ -1575,8 +1575,6 @@
                           <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer"><input type="checkbox" class="brand-check" value="Hot Wheels"> Hot Wheels</label>
                           <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer"><input type="checkbox" class="brand-check" value="Mini GT"> Mini GT</label>
                           <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer"><input type="checkbox" class="brand-check" value="Matchbox"> Matchbox</label>
-                          <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer"><input type="checkbox" class="brand-check" value="Tomica"> Tomica</label>
-                          <label style="display:flex;align-items:center;gap:6px;font-size:.85rem;cursor:pointer"><input type="checkbox" class="brand-check" value="Bburago"> Bburago</label>
                         </div>
                         <input type="hidden" id="fBrand">
                     </div>
@@ -1808,8 +1806,7 @@
         const BRAND_NORMALIZE_CLIENT = {
           'hotwheels': 'Hot Wheels', 'hot wheels': 'Hot Wheels',
           'minigt': 'Mini GT', 'mini gt': 'Mini GT',
-          'matchbox': 'Matchbox', 'tomica': 'Tomica',
-          'bburago': 'Bburago', 'burago': 'Bburago',
+          'matchbox': 'Matchbox',
         };
         function normalizeBrand(b) {
           if (!b) return b;
@@ -2182,8 +2179,23 @@
                 id, name: document.getElementById('fName').value.trim(),
                 brand: primaryBrand,
                 category: document.getElementById('fCategory').value,
-                price: parseInt(document.getElementById('fPrice').value) || 0,
-                price_old: document.getElementById('fPriceOld').value ? parseInt(document.getElementById('fPriceOld').value) : null,
+                price: (() => {
+                  // Multi-brand: ambil min dari brand_prices rows, bukan fPrice yg tersembunyi
+                  const rows = [...document.querySelectorAll('#brandPriceRows input[data-brand]')];
+                  if (rows.length) {
+                    const prices = rows.map(i => parseInt(i.value)).filter(Boolean);
+                    return prices.length ? Math.min(...prices) : 0;
+                  }
+                  return parseInt(document.getElementById('fPrice').value) || 0;
+                })(),
+                price_old: (() => {
+                  const rows = [...document.querySelectorAll('#brandPriceRows input[data-brand-old]')];
+                  if (rows.length) {
+                    const olds = rows.map(i => parseInt(i.value)).filter(Boolean);
+                    return olds.length ? Math.max(...olds) : null;
+                  }
+                  return document.getElementById('fPriceOld').value ? parseInt(document.getElementById('fPriceOld').value) : null;
+                })(),
                 badge, badge_label: BADGE_LABELS[badge], badge_class: BADGE_CLASSES[badge],
                 img: document.getElementById('fImg').value.trim(),
                 model_path: document.getElementById('fModel').value.trim() || null,

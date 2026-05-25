@@ -161,7 +161,7 @@
         /* ── SIDEBAR FILTER ─────────────────────────────── */
         .filter-sidebar {
             position: sticky;
-            top: 0;
+            top: 50px;
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius-lg);
@@ -936,7 +936,7 @@
                         <span>Rp 0</span>
                         <span id="priceDisplay">Rp 2.000.000</span>
                     </div>
-                    <input type="range" class="price-slider" id="priceSlider" min="0" max="2000000" step="50000"
+                    <input type="range" class="price-slider" id="priceSlider" min="0" max="2000000"
                         value="2000000">
                 </div>
             </div>
@@ -1135,7 +1135,13 @@
 
             // Brand
             if (state.brands.length) {
-                list = list.filter(p => state.brands.includes(p.brand.toLowerCase()));
+                list = list.filter(p => {
+                    // p.brands adalah array, cek apakah ada brand yg cocok
+                    // Normalize: strip spasi + lowercase untuk compare
+                    const norm = s => (s || '').replace(/\s+/g, '').toLowerCase();
+                    const productBrands = (p.brands && p.brands.length) ? p.brands : [p.brand];
+                    return productBrands.some(b => state.brands.includes(norm(b)));
+                });
             }
 
             // Badge
@@ -1296,7 +1302,8 @@
             state.brands.forEach(b => tags.push({ label: b.charAt(0).toUpperCase() + b.slice(1), key: 'brand', val: b }));
             state.badges.forEach(b => tags.push({ label: BADGE_LABELS[b] || b, key: 'badge', val: b }));
             if (state.scale !== 'all') tags.push({ label: `Skala ${state.scale}`, key: 'scale' });
-            if (state.maxPrice < 2000000) tags.push({ label: `Maks ${fmt(state.maxPrice)}`, key: 'price' });
+            const _sliderMax = parseInt(document.getElementById('priceSlider')?.max) || 2000000;
+            if (state.maxPrice < _sliderMax) tags.push({ label: `Maks ${fmt(state.maxPrice)}`, key: 'price' });
 
             if (!tags.length) { wrap.innerHTML = ''; return; }
 
@@ -1314,7 +1321,7 @@
             if (key === 'brand') state.brands = state.brands.filter(b => b !== val);
             if (key === 'badge') state.badges = state.badges.filter(b => b !== val);
             if (key === 'scale') { state.scale = 'all'; document.querySelectorAll('.scale-pill').forEach(p => p.classList.toggle('active', p.dataset.scale === 'all')); }
-            if (key === 'price') { state.maxPrice = 2000000; document.getElementById('priceSlider').value = 2000000; updatePriceDisplay(); }
+            if (key === 'price') { const sm = parseInt(document.getElementById('priceSlider').max) || 2000000; state.maxPrice = sm; document.getElementById('priceSlider').value = sm; updatePriceDisplay(); }
             syncCheckboxes();
             state.shown = state.perPage;
             render();
@@ -1334,7 +1341,7 @@
 
         function updateFilterBadge() {
             const count = state.categories.length + state.brands.length + state.badges.length +
-                (state.scale !== 'all' ? 1 : 0) + (state.maxPrice < 2000000 ? 1 : 0);
+                (state.scale !== 'all' ? 1 : 0) + (state.maxPrice < (parseInt(document.getElementById('priceSlider')?.max) || 2000000) ? 1 : 0);
             const badge = document.getElementById('filterBadgeCount');
             badge.textContent = count;
             badge.style.display = count > 0 ? 'flex' : 'none';
@@ -1343,11 +1350,46 @@
         /* ─────────────────────────────────────────────────────
            PRICE DISPLAY
         ───────────────────────────────────────────────────── */
+        function updateFilterCounts() {
+            const norm = s => (s || '').replace(/\s+/g, '').toLowerCase();
+
+            // Category counts
+            document.querySelectorAll('input[name="category"]').forEach(cb => {
+                const count = PRODUCTS.filter(p => p.category === cb.value).length;
+                const el = cb.closest('label').querySelector('.filter-count');
+                if (el) el.textContent = count;
+            });
+
+            // Brand counts: produk multi-brand dihitung ke tiap brandnya
+            document.querySelectorAll('input[name="brand"]').forEach(cb => {
+                const count = PRODUCTS.filter(p => {
+                    const productBrands = (p.brands && p.brands.length) ? p.brands : [p.brand];
+                    return productBrands.some(b => norm(b) === cb.value);
+                }).length;
+                const el = cb.closest('label').querySelector('.filter-count');
+                if (el) el.textContent = count;
+            });
+
+            // Badge counts
+            document.querySelectorAll('input[name="badge"]').forEach(cb => {
+                const count = PRODUCTS.filter(p => p.badge === cb.value).length;
+                const el = cb.closest('label').querySelector('.filter-count');
+                if (el) el.textContent = count;
+            });
+        }
+
         function updatePriceDisplay() {
-            const val = parseInt(document.getElementById('priceSlider').value);
+            const slider = document.getElementById('priceSlider');
+            const val = parseInt(slider.value);
+            
+            // Ambil nilai max secara dinamis dari elemen slider-nya langsung
+            const maxVal = parseInt(slider.max) || 2000000; 
+            
             document.getElementById('priceDisplay').textContent = fmt(val);
-            const pct = ((val / 2000000) * 100).toFixed(1);
-            document.getElementById('priceSlider').style.setProperty('--val', pct + '%');
+            
+            // Kalkulasi persentase menggunakan maxVal yang dinamis
+            const pct = ((val / maxVal) * 100).toFixed(1);
+            slider.style.setProperty('--val', pct + '%');
         }
 
         /* ─────────────────────────────────────────────────────
@@ -1389,6 +1431,19 @@
                         tags: [p.category || 'all', (p.brand || '').toLowerCase()],
                         newest: p.badge && p.badge.toLowerCase() === 'new'
                     }));
+                    // Hitung maxPrice dari data aktual
+                    const maxProductPrice = PRODUCTS.length
+                        ? Math.max(...PRODUCTS.map(p => p.price))
+                        : 2000000;
+                    // Bulatkan ke atas ke kelipatan 50000 terdekat
+                    const sliderMax = Math.ceil(maxProductPrice / 50000) * 50000;
+                    state.maxPrice = sliderMax;
+                    const slider = document.getElementById('priceSlider');
+                    slider.max = sliderMax;
+                    slider.value = sliderMax;
+                    updatePriceDisplay();
+                    // Update filter counts dari data aktual
+                    updateFilterCounts();
                     // Render segera setelah data masuk
                     render();
                 }
@@ -1469,10 +1524,11 @@
 
             // Clear all filters
             document.getElementById('clearAllFilters').addEventListener('click', () => {
+                const _sm = parseInt(document.getElementById('priceSlider').max) || 2000000;
                 state.search = ''; state.categories = []; state.brands = [];
-                state.badges = []; state.scale = 'all'; state.maxPrice = 2000000;
+                state.badges = []; state.scale = 'all'; state.maxPrice = _sm;
                 document.getElementById('searchInput').value = '';
-                document.getElementById('priceSlider').value = 2000000;
+                document.getElementById('priceSlider').value = _sm;
                 updatePriceDisplay();
                 document.querySelectorAll('.scale-pill').forEach(p => p.classList.toggle('active', p.dataset.scale === 'all'));
                 syncCheckboxes();

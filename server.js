@@ -30,8 +30,7 @@ async function sendMail({ to, subject, html }) {
 const BRAND_NORMALIZE = {
   'hotwheels': 'Hot Wheels', 'hot wheels': 'Hot Wheels',
   'minigt': 'Mini GT', 'mini gt': 'Mini GT',
-  'matchbox': 'Matchbox', 'tomica': 'Tomica',
-  'bburago': 'Bburago', 'burago': 'Bburago',
+  'matchbox': 'Matchbox',
 };
 function normalizeBrand(b) {
   if (!b || typeof b !== 'string') return b;
@@ -393,7 +392,7 @@ app.get('/products/:id', async (req, res) => {
 app.post('/api/admin/products', authenticateAdmin, async (req, res) => {
   try {
     const { id, name, brand, brands, category, price, price_old, badge, img, model_path, stock } = req.body;
-    if (!id || !name || !category || !price) return res.status(400).json({ error: 'Field wajib: id, name, category, price.' });
+    if (!id || !name || !category || (price === undefined || price === null || price === '')) return res.status(400).json({ error: 'Field wajib: id, name, category, price.' });
     const brandsJson = JSON.stringify(Array.isArray(brands) ? brands : (brand ? [brand] : []));
     const primaryBrand = Array.isArray(brands) && brands.length ? brands[0] : (brand || '');
     // Build brand_prices JSON from submitted data

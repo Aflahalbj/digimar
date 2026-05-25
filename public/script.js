@@ -12,12 +12,7 @@ const BRAND_LOGOS = {
   'Hot Wheels':  { logo: '/assets/images.png',   fallbackBg: '#e8001c', fallbackText: '#fff', height: 20 },
   'Mini GT':     { logo: '/assets/minigt.png',   fallbackBg: '#0a0e18', fallbackText: '#fff', height: 18 },
   'Matchbox':    { logo: '/assets/matchbox.png', fallbackBg: '#003a9b', fallbackText: '#fff', height: 22 },
-  'Tomica':      { logo: '/assets/tomica.png',   fallbackBg: '#cc0000', fallbackText: '#fff', height: 18 },
-  'Bburago':     { logo: '/assets/burago.png',   fallbackBg: '#333',    fallbackText: '#fff', height: 18 },
   // Tanpa spasi (format DB lama)
-  'HotWheels':   { logo: '/assets/images.png',   fallbackBg: '#e8001c', fallbackText: '#fff', height: 20 },
-  'MiniGT':      { logo: '/assets/minigt.png',   fallbackBg: '#0a0e18', fallbackText: '#fff', height: 18 },
-  'MatchBox':    { logo: '/assets/matchbox.png', fallbackBg: '#003a9b', fallbackText: '#fff', height: 22 },
 };
 
 function brandLogosHTML(brands, height) {
@@ -197,15 +192,21 @@ function showCartPopup(id, name, price, img, availableBrands, brandPricesStr) {
       @keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
       #cartPopup{background:#0d1117;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:28px;width:100%;max-width:400px;color:#f8fafc;font-family:'Outfit',sans-serif}
       #cartPopup h3{font-size:1.1rem;font-weight:700;margin-bottom:4px;font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
-      #cartPopup .popup-sub{font-size:.8rem;color:#94a3b8;margin-bottom:20px}
+      #cartPopup .popup-sub{font-size:.8rem;color:#94a3b8;margin-bottom:16px}
       #cartPopup .popup-label{font-size:.8rem;font-weight:600;color:#94a3b8;margin-bottom:7px;display:block}
-      #cartPopup .brand-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px}
+      #cartPopup .brand-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
       #cartPopup .brand-btn{padding:10px 6px;border:1.5px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.25);color:#f8fafc;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:.82rem;font-weight:600;transition:.2s;text-align:center}
       #cartPopup .brand-btn:hover,#cartPopup .brand-btn.selected{border-color:#f97316;background:rgba(249,115,22,.12);color:#f97316}
-      #cartPopup .qty-row{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+      #cartPopup .popup-price-row{display:flex;align-items:center;justify-content:space-between;background:rgba(249,115,22,.07);border:1px solid rgba(249,115,22,.18);border-radius:10px;padding:10px 14px;margin-bottom:16px}
+      #cartPopup .popup-price-label{font-size:.75rem;color:#94a3b8;font-weight:600}
+      #cartPopup .popup-price-val{font-size:1.05rem;font-weight:700;color:#f97316;font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
+      #cartPopup .qty-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
       #cartPopup .qty-ctrl{width:36px;height:36px;border:1.5px solid rgba(255,255,255,0.15);background:none;color:#f8fafc;border-radius:8px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
       #cartPopup .qty-ctrl:hover{border-color:#f97316;color:#f97316}
       #cartPopup .qty-val{font-size:1.2rem;font-weight:700;min-width:28px;text-align:center;font-family:'Rajdhani',sans-serif}
+      #cartPopup .popup-total-row{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(255,255,255,.07);padding-top:12px;margin-bottom:16px}
+      #cartPopup .popup-total-label{font-size:.8rem;color:#94a3b8;font-weight:600}
+      #cartPopup .popup-total-val{font-size:1.2rem;font-weight:700;color:#f8fafc;font-family:'Rajdhani',sans-serif;letter-spacing:.5px}
       #cartPopup .popup-actions{display:flex;gap:10px}
       #cartPopup .popup-cancel{flex:1;padding:11px;background:none;border:1.5px solid rgba(255,255,255,0.1);color:#94a3b8;border-radius:10px;cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600;transition:.2s}
       #cartPopup .popup-cancel:hover{border-color:#94a3b8;color:#f8fafc}
@@ -217,11 +218,19 @@ function showCartPopup(id, name, price, img, availableBrands, brandPricesStr) {
       <div class="popup-sub">${name.length > 38 ? name.slice(0,38)+'…' : name}</div>
       <span class="popup-label">Pilih Brand</span>
       <div class="brand-grid" id="popupBrandGrid"></div>
+      <div class="popup-price-row">
+        <span class="popup-price-label">Harga</span>
+        <span class="popup-price-val" id="popupPriceVal">—</span>
+      </div>
       <span class="popup-label">Jumlah</span>
       <div class="qty-row">
         <button class="qty-ctrl" id="popupQtyDec">−</button>
         <span class="qty-val" id="popupQtyVal">1</span>
         <button class="qty-ctrl" id="popupQtyInc">+</button>
+      </div>
+      <div class="popup-total-row">
+        <span class="popup-total-label">Total</span>
+        <span class="popup-total-val" id="popupTotalVal">—</span>
       </div>
       <div class="popup-actions">
         <button class="popup-cancel" id="popupCancel">Batal</button>
@@ -268,26 +277,35 @@ function showCartPopup(id, name, price, img, availableBrands, brandPricesStr) {
       overlay.querySelectorAll('.brand-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       selectedBrand = btn.dataset.brand;
-      if (typeof updatePopupPrice === 'function') updatePopupPrice();
+      updatePopupPrice();
     });
   });
+  // Init price display immediately
+  setTimeout(() => updatePopupPrice(), 0);
   document.getElementById('popupQtyDec').addEventListener('click', () => {
-    if (qty > 1) { qty--; document.getElementById('popupQtyVal').textContent = qty; }
+    if (qty > 1) { qty--; document.getElementById('popupQtyVal').textContent = qty; updatePopupTotal(); }
   });
   document.getElementById('popupQtyInc').addEventListener('click', () => {
-    if (qty < 99) { qty++; document.getElementById('popupQtyVal').textContent = qty; }
+    if (qty < 99) { qty++; document.getElementById('popupQtyVal').textContent = qty; updatePopupTotal(); }
   });
   document.getElementById('popupCancel').addEventListener('click', () => overlay.remove());
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 
-  // Update price when brand is selected
+  // Update price display & total when brand selected or qty changed
   function updatePopupPrice() {
     const bp = (() => { try { return JSON.parse(overlay.dataset.brandPrices || 'null'); } catch { return null; } })();
-    if (bp && bp[selectedBrand]) {
-      const p = bp[selectedBrand].price;
-      overlay.querySelector('.popup-sub').textContent = (document.querySelector(`.product-card[id="${id}"] .product-name`)?.textContent || name.slice(0,38)) + ' · ' + formatRupiah(p);
-      overlay._price = p;
-    }
+    // Fuzzy match brand key in bp
+    const normB = s => s.replace(/\s+/g,'').toLowerCase();
+    const bpKey = bp ? Object.keys(bp).find(k => normB(k) === normB(selectedBrand)) : null;
+    const unitPrice = (bp && bpKey) ? (bp[bpKey].price || price) : price;
+    overlay._price = unitPrice;
+    const priceEl = document.getElementById('popupPriceVal');
+    if (priceEl) priceEl.textContent = formatRupiah(unitPrice);
+    updatePopupTotal();
+  }
+  function updatePopupTotal() {
+    const totalEl = document.getElementById('popupTotalVal');
+    if (totalEl) totalEl.textContent = formatRupiah((overlay._price || price) * qty);
   }
 
   document.getElementById('popupConfirm').addEventListener('click', () => {
@@ -404,15 +422,15 @@ function initCartButtons() {
       if (!added) return;
 
       // Flash the main button if it's the main one (not overlay)
-      const mainBtn = card.querySelector('.add-to-cart-main');
-      if (mainBtn && btn === mainBtn) {
-        mainBtn.innerHTML = '✓ Ditambahkan!';
-        mainBtn.classList.add('added');
-        setTimeout(() => {
-          mainBtn.innerHTML = '<dotlottie-wc src="https://lottie.host/f243d374-dbaf-40c9-aae7-8966d16f3d00/j6hjZ0mPui.lottie" style = "width: 25px;height: 25px" speed = "1.5" autoplay loop ></dotlottie-wc> ';
-          mainBtn.classList.remove('added');
-        }, 1800);
-      }
+      // const mainBtn = card.querySelector('.add-to-cart-main');
+      // if (mainBtn && btn === mainBtn) {
+      //   mainBtn.innerHTML = '✓ Ditambahkan!';
+      //   mainBtn.classList.add('added');
+      //   setTimeout(() => {
+      //     mainBtn.innerHTML = '<dotlottie-wc src="https://lottie.host/f243d374-dbaf-40c9-aae7-8966d16f3d00/j6hjZ0mPui.lottie" style = "width: 25px;height: 25px" speed = "1.5" autoplay loop ></dotlottie-wc> ';
+      //     mainBtn.classList.remove('added');
+      //   }, 1800);
+      // }
     });
   });
 }
