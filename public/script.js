@@ -1031,10 +1031,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Session end (durasi) ──────────────────────────────
   function trackSessionEnd() {
     const duration_sec = (Date.now() - sessionStart) / 1000;
-    navigator.sendBeacon(
-      API + '/session-end',
-      JSON.stringify({ session_id: sessionId, duration_sec })
+    const blob = new Blob(
+      [JSON.stringify({ session_id: sessionId, duration_sec })],
+      { type: 'application/json' }
     );
+    navigator.sendBeacon(API + '/session-end', blob);
   }
 
   // ── Product events ────────────────────────────────────

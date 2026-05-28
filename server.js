@@ -494,19 +494,26 @@ app.post('/api/analytics/pageview', async (req, res) => {
   }
 });
 
-app.post('/api/analytics/session-end', async (req, res) => {
-  try {
-    const { session_id, duration_sec } = req.body;
-    if (!session_id) return res.status(400).json({ error: 'session_id wajib.' });
-    await db.execute(
-      'UPDATE sessions SET duration_sec = ?, ended_at = NOW() WHERE id = ?',
-      [Math.round(duration_sec) || 0, session_id]
-    );
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(500).json({ error: 'Gagal mencatat durasi.' });
-  }
-});
+app.post('/api/analytics/session-end', 
+
+  async (req, res) => {
+    try {
+      let body = req.body;
+      // Jika body adalah string (dari sendBeacon tanpa Blob), parse manual
+      if (typeof body === 'string') {
+        try { body = JSON.parse(body); } catch { body = {}; }
+      }
+      const { session_id, duration_sec } = body;
+      if (!session_id) return res.status(400).json({ error: 'session_id wajib.' });
+      await db.execute(
+        'UPDATE sessions SET duration_sec = ?, ended_at = NOW() WHERE id = ?',
+        [Math.round(duration_sec) || 0, session_id]
+      );
+      res.json({ ok: true });
+    } catch (e) {
+      res.status(500).json({ error: 'Gagal mencatat durasi.' });
+    }
+  });
 
 app.post('/api/analytics/product-event', async (req, res) => {
   try {

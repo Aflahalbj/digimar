@@ -1693,6 +1693,7 @@
         function fmt(n) { return 'Rp ' + parseInt(n).toLocaleString('id-ID'); }
         function fmtDur(s) {
             s = parseInt(s) || 0;
+            if (!s) return '—'; 
             if (s < 60) return s + 'd';
             if (s < 3600) return Math.round(s / 60) + 'm ' + (s % 60) + 'd';
             return Math.floor(s / 3600) + 'j ' + Math.round((s % 3600) / 60) + 'm';
