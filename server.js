@@ -282,6 +282,47 @@ app.post('/api/cart/sync', authenticateToken, async (req, res) => {
   }
 });
 
+// Buat pesanan baru saat user klik "Checkout via WhatsApp".
+// Item yang dicatat HANYA item yang dicentang/dipilih user di cart (bukan seluruh cart),
+// supaya nanti saat admin accept, yang dihapus dari cart juga cuma item itu saja.
+app.post('/api/orders', authenticateToken, async (req, res) => {
+  try {
+    const { items, total } = req.body;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'Tidak ada item yang dipilih untuk checkout.' });
+    }
+    if (items.length > 50) {
+      return res.status(400).json({ error: 'Terlalu banyak item.' });
+    }
+    for (const item of items) {
+      if (
+        !item.product_id || typeof item.product_id !== 'string' ||
+        !item.name || typeof item.name !== 'string' ||
+        typeof item.price !== 'number' || item.price < 0 ||
+        typeof item.qty !== 'number' || item.qty < 1 || item.qty > 999
+      ) {
+        return res.status(400).json({ error: 'Data item pesanan tidak valid.' });
+      }
+    }
+
+    const [[user]] = await db.execute('SELECT name, email FROM users WHERE id = ?', [req.user.id]);
+    if (!user) return res.status(404).json({ error: 'User tidak ditemukan.' });
+
+    const computedTotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
+
+    const [result] = await db.execute(
+      'INSERT INTO orders (user_id, user_name, user_email, items, total, status) VALUES (?, ?, ?, ?, ?, \'pending\')',
+      [req.user.id, user.name, user.email, JSON.stringify(items), total || computedTotal]
+    );
+
+    res.json({ message: 'Pesanan berhasil dicatat.', order_id: result.insertId });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Gagal mencatat pesanan.' });
+  }
+});
+
 // ─── ADMIN MIDDLEWARE ─────────────────────────────────
 const authenticateAdmin = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -636,6 +677,106 @@ app.delete('/api/admin/users/:id', authenticateAdmin, async (req, res) => {
     res.json({ message: 'Pengguna berhasil dihapus.' });
   } catch (e) {
     res.status(500).json({ error: 'Gagal menghapus pengguna.' });
+  }
+});
+
+// ─── ADMIN: KELOLA PESANAN ────────────────────────────
+// List semua pesanan (default: yang masih pending duluan, lalu terbaru)
+app.get('/api/admin/orders', authenticateAdmin, async (req, res) => {
+  try {
+    const status = req.query.status; // optional filter
+    const VALID_STATUSES = ['pending', 'rejected', 'belum_bayar', 'dikemas', 'dikirim', 'selesai', 'pengembalian', 'dibatalkan'];
+    let query = 'SELECT * FROM orders';
+    const params = [];
+    if (status && VALID_STATUSES.includes(status)) {
+      query += ' WHERE status = ?';
+      params.push(status);
+    }
+    query += ` ORDER BY FIELD(status, 'pending', 'belum_bayar', 'dikemas', 'dikirim', 'selesai', 'pengembalian', 'rejected', 'dibatalkan'), created_at DESC`;
+    const [rows] = await db.execute(query, params);
+    const orders = rows.map(r => ({
+      ...r,
+      items: (() => { try { return typeof r.items === 'object' ? r.items : JSON.parse(r.items); } catch { return []; } })()
+    }));
+    res.json(orders);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal mengambil pesanan.' });
+  }
+});
+
+// Admin accept pesanan -> hapus item yang di-checkout itu (id+brand) dari cart user terkait,
+// lalu set status pesanan ke 'belum_bayar' (status awal setelah accept).
+// Item brand lain dari produk yang sama TIDAK ikut terhapus.
+app.patch('/api/admin/orders/:id/accept', authenticateAdmin, async (req, res) => {
+  const connection = await db.getConnection();
+  try {
+    const [rows] = await connection.execute('SELECT * FROM orders WHERE id = ?', [req.params.id]);
+    if (!rows.length) { connection.release(); return res.status(404).json({ error: 'Pesanan tidak ditemukan.' }); }
+    const order = rows[0];
+    if (order.status !== 'pending') {
+      connection.release();
+      return res.status(400).json({ error: 'Pesanan ini sudah diproses sebelumnya.' });
+    }
+    const items = typeof order.items === 'object' ? order.items : JSON.parse(order.items);
+
+    await connection.beginTransaction();
+
+    for (const item of items) {
+      // Hapus persis item product_id + brand yang sama dari cart user ini.
+      // Brand lain dari product_id yang sama (kalau ada) tidak tersentuh.
+      await connection.execute(
+        'DELETE FROM cart WHERE user_id = ? AND product_id = ? AND brand = ?',
+        [order.user_id, item.product_id, item.brand || '']
+      );
+    }
+
+    await connection.execute('UPDATE orders SET status = \'belum_bayar\' WHERE id = ?', [req.params.id]);
+    await connection.commit();
+    res.json({ message: 'Pesanan diterima dan item dihapus dari keranjang user.' });
+  } catch (e) {
+    await connection.rollback();
+    console.error(e);
+    res.status(500).json({ error: 'Gagal memproses pesanan.' });
+  } finally {
+    connection.release();
+  }
+});
+
+// Admin tolak pesanan (hanya berlaku saat masih 'pending') -> cart user TIDAK diubah sama sekali.
+app.patch('/api/admin/orders/:id/reject', authenticateAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.execute('SELECT id, status FROM orders WHERE id = ?', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Pesanan tidak ditemukan.' });
+    if (rows[0].status !== 'pending') return res.status(400).json({ error: 'Pesanan ini sudah diproses sebelumnya.' });
+    await db.execute('UPDATE orders SET status = \'rejected\' WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Pesanan ditolak.' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal menolak pesanan.' });
+  }
+});
+
+// Update status lanjutan pesanan SETELAH accept: belum_bayar -> dikemas -> dikirim -> selesai,
+// atau pengembalian / dibatalkan dari state manapun setelah accept.
+app.patch('/api/admin/orders/:id/status', authenticateAdmin, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const ALLOWED = ['belum_bayar', 'dikemas', 'dikirim', 'selesai', 'pengembalian', 'dibatalkan'];
+    if (!ALLOWED.includes(status)) {
+      return res.status(400).json({ error: 'Status tidak valid.' });
+    }
+    const [rows] = await db.execute('SELECT id, status FROM orders WHERE id = ?', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Pesanan tidak ditemukan.' });
+    const current = rows[0].status;
+    if (current === 'pending' || current === 'rejected') {
+      return res.status(400).json({ error: 'Pesanan harus di-accept terlebih dahulu sebelum mengubah status ini.' });
+    }
+    await db.execute('UPDATE orders SET status = ? WHERE id = ?', [status, req.params.id]);
+    res.json({ message: 'Status pesanan diperbarui.' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal memperbarui status pesanan.' });
   }
 });
 

@@ -108,6 +108,22 @@ function updateBadge() {
   if (!_suppressSync) debouncedSync();
 }
 
+// ─── CART ITEM KEY HELPER ───────────────────────────
+// Satu produk bisa ada beberapa kali di cart dengan brand berbeda,
+// jadi semua operasi (hapus/qty/checkbox) HARUS pakai kombinasi id+brand,
+// bukan id saja. Kalau cuma pakai id, hapus 1 brand bisa ikut menghapus brand lain.
+function cartKey(item) {
+  return item.id + '|' + (item.brand || '');
+}
+
+// Set berisi cartKey() dari item yang dicentang untuk checkout.
+let selectedCartKeys = new Set();
+// Set berisi cartKey() dari item yang PERNAH muncul di cart sebelumnya.
+// Dipakai supaya "default checked untuk item baru" tidak menimpa item yang
+// sudah pernah di-uncheck user (bug sebelumnya: re-render selalu nge-re-add
+// semua key ke selectedCartKeys, jadi uncheck langsung balik checked lagi).
+let knownCartKeys = new Set();
+
 // ─── RENDER CART ITEMS ─────────────────────────────
 function renderCart() {
   const body = document.getElementById('cartBody');
@@ -126,14 +142,35 @@ function renderCart() {
     emptyEl.style.display = 'none';
     footer.style.display = 'flex';
 
-    const grandTotal = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
-    totalEl.textContent = formatRupiah(grandTotal);
+    // Hanya item yang BENAR-BENAR baru (belum pernah terlihat sama sekali) yang di-default-check.
+    // Item yang sudah pernah di-uncheck user TIDAK akan ke-checklist ulang saat re-render.
+    const currentKeys = new Set(cart.map(cartKey));
+    cart.forEach(item => {
+      const key = cartKey(item);
+      if (!knownCartKeys.has(key)) {
+        selectedCartKeys.add(key);
+        knownCartKeys.add(key);
+      }
+    });
+    // Bersihkan key yang sudah tidak ada di cart lagi (item dihapus)
+    selectedCartKeys.forEach(key => { if (!currentKeys.has(key)) selectedCartKeys.delete(key); });
+    knownCartKeys.forEach(key => { if (!currentKeys.has(key)) knownCartKeys.delete(key); });
+
+    const selectedTotal = cart
+      .filter(i => selectedCartKeys.has(cartKey(i)))
+      .reduce((sum, i) => sum + i.price * i.qty, 0);
+    totalEl.textContent = formatRupiah(selectedTotal);
 
     cart.forEach(item => {
+      const key = cartKey(item);
+      const checked = selectedCartKeys.has(key);
       const el = document.createElement('div');
       el.className = 'cart-item';
       el.dataset.id = item.id;
+      el.dataset.brand = item.brand || '';
+      el.dataset.key = key;
       el.innerHTML = `
+        <input type="checkbox" class="cart-item-check" data-key="${key}" ${checked ? 'checked' : ''} aria-label="Pilih item untuk checkout">
         <div class="cart-item-img"><img src="${item.img || 'assets/ferrari_static.png'}" alt="🚗" class="item-img" onerror="this.src='assets/ferrari_static.png'"></div>
         <div class="cart-item-info">
           <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;min-height:16px">
@@ -143,10 +180,10 @@ function renderCart() {
           <div class="cart-item-price">${formatRupiah(item.price)}</div>
         </div>
         <div class="cart-item-controls">
-          <button class="qty-btn qty-dec" data-id="${item.id}">−</button>
+          <button class="qty-btn qty-dec" data-key="${key}">−</button>
           <span class="qty-num">${item.qty}</span>
-          <button class="qty-btn qty-inc" data-id="${item.id}">+</button>
-          <button class="remove-btn" data-id="${item.id}" title="Hapus"><i class="fa-solid fa-trash-can"></i></button>
+          <button class="qty-btn qty-inc" data-key="${key}">+</button>
+          <button class="remove-btn" data-key="${key}" title="Hapus"><i class="fa-solid fa-trash-can"></i></button>
         </div>
       `;
       body.appendChild(el);
@@ -154,22 +191,38 @@ function renderCart() {
 
     attachBrandLogoFallbacks(body);
 
-    // Qty/remove listeners
+    // Checkbox listeners
+    body.querySelectorAll('.cart-item-check').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const key = cb.dataset.key;
+        if (cb.checked) selectedCartKeys.add(key);
+        else selectedCartKeys.delete(key);
+        renderCart();
+      });
+    });
+
+    // Qty/remove listeners (pakai key, bukan id, supaya brand lain tidak ikut kena)
     body.querySelectorAll('.qty-inc').forEach(btn => {
       btn.addEventListener('click', () => {
-        changeQty(btn.dataset.id, 1);
+        changeQtyByKey(btn.dataset.key, 1);
       });
     });
     body.querySelectorAll('.qty-dec').forEach(btn => {
       btn.addEventListener('click', () => {
-        changeQty(btn.dataset.id, -1);
+        changeQtyByKey(btn.dataset.key, -1);
       });
     });
     body.querySelectorAll('.remove-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        removeFromCart(btn.dataset.id);
+        removeFromCartByKey(btn.dataset.key);
       });
     });
+
+    // Sinkronkan checkbox "Pilih Semua"
+    const selectAllEl = document.getElementById('cartSelectAll');
+    if (selectAllEl) {
+      selectAllEl.checked = cart.length > 0 && cart.every(i => selectedCartKeys.has(cartKey(i)));
+    }
   }
 }
 
@@ -339,19 +392,25 @@ function addToCart(id, name, price, img, brand = '', qty = 1) {
   return true;
 }
 
-function changeQty(id, delta) {
-  const item = cart.find(i => i.id === id);
+// Versi lama berbasis id saja — sengaja DIHAPUS karena ini sumber bug:
+// menghapus 1 brand dari sebuah produk ikut menghapus brand lain dari produk yang sama
+// (karena beberapa cart item bisa share id yang sama, beda brand).
+// Ganti total dengan versi berbasis key (id+brand) di bawah.
+function changeQtyByKey(key, delta) {
+  const item = cart.find(i => cartKey(i) === key);
   if (!item) return;
   item.qty += delta;
   if (item.qty <= 0) {
-    cart = cart.filter(i => i.id !== id);
+    cart = cart.filter(i => cartKey(i) !== key);
+    selectedCartKeys.delete(key);
   }
   updateBadge();
   renderCart();
 }
 
-function removeFromCart(id) {
-  cart = cart.filter(i => i.id !== id);
+function removeFromCartByKey(key) {
+  cart = cart.filter(i => cartKey(i) !== key);
+  selectedCartKeys.delete(key);
   updateBadge();
   renderCart();
   showToast('Item dihapus dari keranjang', '<i class="fa-solid fa-trash-can" style="color: red;"></i>');
@@ -359,31 +418,58 @@ function removeFromCart(id) {
 
 function clearCart() {
   cart = [];
+  selectedCartKeys.clear();
   updateBadge();
   renderCart();
   showToast('Keranjang dikosongkan', '<i class="fa-solid fa-trash-can" style="color: red;"></i>');
 }
 
 // ─── WHATSAPP CHECKOUT ─────────────────────────────
-function checkoutWhatsApp() {
+async function checkoutWhatsApp() {
   if (cart.length === 0) {
     showToast('Keranjang masih kosong!', '<i class="fa-solid fa-triangle-exclamation" style="color: var(--gold);"></i>');
     return;
   }
 
-  const itemLines = cart.map(i =>
+  const selectedItems = cart.filter(i => selectedCartKeys.has(cartKey(i)));
+  if (selectedItems.length === 0) {
+    showToast('Pilih dulu item yang mau di-checkout ya!', '<i class="fa-solid fa-triangle-exclamation" style="color: var(--gold);"></i>');
+    return;
+  }
+
+  const itemLines = selectedItems.map(i =>
+
     `  • ${i.name}${i.brand ? ' [' + i.brand + ']' : ''} (${i.qty}x) = ${formatRupiah(i.price * i.qty)}`
   ).join('\n');
 
-  const total = cart.reduce((sum, i) => sum + i.price * i.qty, 0);
+  const total = selectedItems.reduce((sum, i) => sum + i.price * i.qty, 0);
 
   const message =
     `Halo  admin DAICASTKU! 👋\n\n` +
-    `Saya mau beli semua yang di keranjang:\n\n` +
+    `Saya mau beli item berikut dari keranjang:\n\n` +
     `${itemLines}\n\n` +
     `━━━━━━━━━━━━━━━━━━━\n` +
     `💰 Total: ${formatRupiah(total)}\n\n` +
     `Mohon konfirmasi ketersediaan dan info pembayarannya ya. Terima kasih! 🙏`;
+
+  // Catat pesanan ke server supaya muncul di "Kelola Pesanan" admin.
+  // Item baru dihapus dari cart user setelah admin klik "Accept" pesanan ini,
+  // bukan langsung saat checkout (biar aman kalau order ternyata gak jadi/ditolak).
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      await fetch(`${API_URL}/orders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          items: selectedItems.map(i => ({ product_id: i.id, brand: i.brand || '', name: i.name, price: i.price, qty: i.qty })),
+          total,
+        }),
+      });
+    } catch (err) {
+      console.error('Gagal mencatat pesanan', err);
+    }
+  }
 
   const encoded = encodeURIComponent(message);
   window.open(`https://wa.me/${WA_NUMBER}?text=${encoded}`, '_blank');
@@ -772,6 +858,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('cartOverlay').addEventListener('click', closeCart);
   document.getElementById('cartClear').addEventListener('click', clearCart);
   document.getElementById('checkoutWA').addEventListener('click', checkoutWhatsApp);
+  document.getElementById('cartSelectAll').addEventListener('change', (e) => {
+    if (e.target.checked) cart.forEach(i => selectedCartKeys.add(cartKey(i)));
+    else selectedCartKeys.clear();
+    renderCart();
+  });
 
   // Close cart when user clicks "Lihat Koleksi" inside empty state
   const cartShopLink = document.getElementById('cartShopLink');
@@ -786,7 +877,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ─── LRU CACHE 3D MODEL ────────────────────────────
-const MAX_ACTIVE_MODELS = 3;
+// Sebelumnya 3 model 3D bisa aktif bersamaan di RAM sekaligus -> bikin web lag pas load.
+// Sekarang cuma 1 model 3D yang boleh aktif dalam satu waktu.
+const MAX_ACTIVE_MODELS = 1;
 let active3DContainers = [];
 
 function aktifkan3D(container) {

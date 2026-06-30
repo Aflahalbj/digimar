@@ -873,6 +873,168 @@
             background: rgba(239, 68, 68, 0.08);
         }
 
+        /* ── ORDERS (KELOLA PESANAN) ───────────────────── */
+        .order-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 18px 20px;
+        }
+
+        .order-card-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .order-user {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .order-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .order-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .order-status-pill.pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--gold);
+        }
+
+        .order-status-pill.belum_bayar {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--gold);
+        }
+
+        .order-status-pill.dikemas {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+        }
+
+        .order-status-pill.dikirim {
+            background: rgba(168, 85, 247, 0.15);
+            color: #c084fc;
+        }
+
+        .order-status-pill.selesai {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .order-status-pill.pengembalian {
+            background: rgba(249, 115, 22, 0.15);
+            color: var(--primary);
+        }
+
+        .order-status-pill.dibatalkan,
+        .order-status-pill.rejected {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .order-status-select {
+            background: var(--bg-input, #1e293b);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 7px 12px;
+            font-family: var(--font-main);
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .order-items {
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 10px 0;
+            margin-bottom: 12px;
+        }
+
+        .order-item-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            padding: 4px 0;
+            color: var(--text-secondary, #cbd5e1);
+        }
+
+        .order-item-row .name {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .order-card-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .order-total {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.05rem;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-order-accept, .btn-order-reject {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-main);
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-order-accept {
+            background: linear-gradient(135deg, var(--success), #16a34a);
+            color: #fff;
+        }
+
+        .btn-order-accept:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(34, 197, 94, 0.35);
+        }
+
+        .btn-order-reject {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-order-reject:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
         /* ── MODAL ──────────────────────────────────────── */
         .modal-overlay {
             position: fixed;
@@ -1186,6 +1348,9 @@
                 <button class="nav-item" data-page="users-crud">
                     <i class="fas fa-users-cog"></i> Kelola Pengguna
                 </button>
+                <button class="nav-item" data-page="orders-crud">
+                    <i class="fas fa-receipt"></i> Kelola Pesanan
+                </button>
 
                 <button class="nav-item" data-page="broadcast">
                     <i class="fas fa-paper-plane"></i> Kirim Email Promo
@@ -1480,6 +1645,34 @@
                 </div>
             </div>
 
+            <!-- PAGE: ORDERS CRUD -->
+            <div class="page" id="page-orders-crud">
+                <div class="pm-toolbar">
+                    <div class="pm-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="orderSearch" placeholder="Cari pesanan (nama/email)...">
+                    </div>
+                    <select class="form-select" id="orderStatusFilter" style="max-width:180px">
+                        <option value="">Semua Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="belum_bayar">Belum Bayar</option>
+                        <option value="dikemas">Dikemas</option>
+                        <option value="dikirim">Dikirim</option>
+                        <option value="selesai">Selesai</option>
+                        <option value="pengembalian">Pengembalian</option>
+                        <option value="dibatalkan">Dibatalkan</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                    <div style="color:var(--text-muted);font-size:0.85rem;display:flex;align-items:center;gap:6px">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="orderCountLabel">Memuat...</span>
+                    </div>
+                </div>
+                <div id="ordersList" style="display:flex;flex-direction:column;gap:14px">
+                    <div class="loading-row" style="padding:40px;text-align:center"><span class="spinner"></span></div>
+                </div>
+            </div>
+
             <!-- PAGE: BROADCAST EMAIL -->
             <div class="page" id="page-broadcast">
               <div style="max-width:680px;width:100%">
@@ -1769,6 +1962,7 @@
             'products-analytics': ['Produk Analytics', 'Performa produk di mata pengunjung'],
             'products-crud': ['Kelola Produk', 'Tambah, edit, dan hapus produk'],
             'users-crud': ['Kelola Pengguna', 'Daftar semua pengguna terdaftar'],
+            'orders-crud': ['Kelola Pesanan', 'Pesanan dari checkout WhatsApp user'],
             'broadcast': ['Kirim Email Promo', 'Broadcast pesan promosi ke pengguna & subscriber'],
         };
         function loadPage(page) {
@@ -1783,7 +1977,7 @@
             document.getElementById('pageTitle').textContent = meta[0];
             document.getElementById('pageSub').textContent = meta[1];
             const rangeWrap = document.getElementById('rangeSelect').parentElement;
-            rangeWrap.style.display = (page === 'products-crud' || page === 'users-crud' || page === 'broadcast') ? 'none' : 'flex';
+            rangeWrap.style.display = (page === 'products-crud' || page === 'users-crud' || page === 'orders-crud' || page === 'broadcast') ? 'none' : 'flex';
             fetchPageData(page);
         }
 
@@ -1797,6 +1991,7 @@
                 if (page === 'products-analytics') await fetchProductsAnalytics();
                 if (page === 'products-crud') await fetchProductsCRUD();
                 if (page === 'users-crud') await fetchUsersCRUD();
+                if (page === 'orders-crud') await fetchOrdersCRUD();
                 if (page === 'broadcast') await loadBroadcastPage();
             } catch (e) {
                 showToast('Gagal memuat data: ' + e.message, 'error');
@@ -1920,6 +2115,135 @@
             document.getElementById('deleteUserModalDesc').textContent = `Akun "${name}" akan dihapus permanen beserta semua data cart-nya.`;
             openModal('deleteUserModal');
         }
+
+        /* ────────────────────────────────────────────────────
+           ORDERS (KELOLA PESANAN)
+        ──────────────────────────────────────────────────── */
+        let allOrders = [];
+
+        async function fetchOrdersCRUD() {
+            const status = document.getElementById('orderStatusFilter')?.value || '';
+            const qs = status ? ('?status=' + status) : '';
+            const orders = await api('/admin/orders' + qs);
+            allOrders = orders;
+            renderOrdersList(orders);
+        }
+
+        function orderStatusLabel(s) {
+            const MAP = {
+                pending: 'Pending',
+                belum_bayar: 'Belum Bayar',
+                dikemas: 'Dikemas',
+                dikirim: 'Dikirim',
+                selesai: 'Selesai',
+                pengembalian: 'Pengembalian',
+                dibatalkan: 'Dibatalkan',
+                rejected: 'Rejected',
+            };
+            return MAP[s] || s;
+        }
+
+        // Status yang bisa dipilih lewat dropdown setelah pesanan di-accept.
+        const POST_ACCEPT_STATUSES = ['belum_bayar', 'dikemas', 'dikirim', 'selesai', 'pengembalian', 'dibatalkan'];
+
+        function renderOrdersList(orders) {
+            const wrap = document.getElementById('ordersList');
+            const label = document.getElementById('orderCountLabel');
+            if (label) label.textContent = orders.length + ' pesanan';
+
+            if (!orders.length) {
+                wrap.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:60px">Belum ada pesanan</div>';
+                return;
+            }
+
+            wrap.innerHTML = orders.map(o => {
+                const items = Array.isArray(o.items) ? o.items : [];
+                const itemRows = items.map(it => `
+        <div class="order-item-row">
+          <span class="name">${it.name}${it.brand ? ' <span style="color:var(--text-muted);font-weight:400">[' + it.brand + ']</span>' : ''}</span>
+          <span>${it.qty}x &nbsp; ${fmt(it.price * it.qty)}</span>
+        </div>`).join('');
+
+                const dateStr = new Date(o.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+                let actions;
+                if (o.status === 'pending') {
+                    // Belum di-accept: tombol Accept / Tolak.
+                    actions = `
+        <div class="order-actions">
+          <button class="btn-order-reject" onclick="rejectOrder(${o.id})"><i class="fas fa-xmark"></i> Tolak</button>
+          <button class="btn-order-accept" onclick="acceptOrder(${o.id})"><i class="fas fa-check"></i> Accept</button>
+        </div>`;
+                } else if (o.status === 'rejected') {
+                    actions = `<div style="font-size:0.78rem;color:var(--text-muted)">Ditolak ${new Date(o.updated_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</div>`;
+                } else {
+                    // Sudah di-accept: dropdown untuk lanjutkan status pesanan.
+                    const options = POST_ACCEPT_STATUSES.map(s =>
+                        `<option value="${s}" ${o.status === s ? 'selected' : ''}>${orderStatusLabel(s)}</option>`
+                    ).join('');
+                    actions = `
+        <select class="order-status-select" onchange="updateOrderStatus(${o.id}, this.value)">
+          ${options}
+        </select>`;
+                }
+
+                return `
+      <div class="order-card">
+        <div class="order-card-head">
+          <div>
+            <div class="order-user">${o.user_name}</div>
+            <div class="order-meta">${o.user_email} &middot; ${dateStr}</div>
+          </div>
+          <span class="order-status-pill ${o.status}">${orderStatusLabel(o.status)}</span>
+        </div>
+        <div class="order-items">${itemRows}</div>
+        <div class="order-card-foot">
+          <div class="order-total">${fmt(o.total)}</div>
+          ${actions}
+        </div>
+      </div>`;
+            }).join('');
+        }
+
+        async function acceptOrder(id) {
+            try {
+                await api(`/admin/orders/${id}/accept`, { method: 'PATCH' });
+                showToast('Pesanan diterima, item dihapus dari keranjang user. Status: Belum Bayar.');
+                fetchOrdersCRUD();
+            } catch (e) {
+                showToast(e.message, 'error');
+            }
+        }
+
+        async function rejectOrder(id) {
+            try {
+                await api(`/admin/orders/${id}/reject`, { method: 'PATCH' });
+                showToast('Pesanan ditolak.');
+                fetchOrdersCRUD();
+            } catch (e) {
+                showToast(e.message, 'error');
+            }
+        }
+
+        async function updateOrderStatus(id, status) {
+            try {
+                await api(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) });
+                showToast(`Status pesanan diubah ke "${orderStatusLabel(status)}".`);
+                fetchOrdersCRUD();
+            } catch (e) {
+                showToast(e.message, 'error');
+                fetchOrdersCRUD(); // revert dropdown ke status sebenarnya kalau gagal
+            }
+        }
+
+        document.getElementById('orderStatusFilter')?.addEventListener('change', fetchOrdersCRUD);
+        document.getElementById('orderSearch')?.addEventListener('input', (e) => {
+            const q = e.target.value.trim().toLowerCase();
+            const filtered = !q ? allOrders : allOrders.filter(o =>
+                o.user_name.toLowerCase().includes(q) || o.user_email.toLowerCase().includes(q)
+            );
+            renderOrdersList(filtered);
+        });
 
         async function deleteUser() {
             if (!deleteTargetUserId) return;
