@@ -696,6 +696,7 @@ app.get('/api/admin/orders', authenticateAdmin, async (req, res) => {
     const [rows] = await db.execute(query, params);
     const orders = rows.map(r => ({
       ...r,
+      status: String(r.status || '').trim(),
       items: (() => { try { return typeof r.items === 'object' ? r.items : JSON.parse(r.items); } catch { return []; } })()
     }));
     res.json(orders);
@@ -781,7 +782,141 @@ app.patch('/api/admin/orders/:id/status', authenticateAdmin, async (req, res) =>
 });
 
 
+// ─── USER: PESANAN SAYA ───────────────────────────────
+// User bisa lihat semua pesananny sendiri (history & status)
+app.get('/api/orders/my', authenticateToken, async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      'SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC',
+      [req.user.id]
+    );
+    const orders = rows.map(r => ({
+      ...r,
+      items: (() => { try { return typeof r.items === 'object' ? r.items : JSON.parse(r.items); } catch { return []; } })()
+    }));
+    res.json(orders);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal mengambil pesanan.' });
+  }
+});
+
+// ─── TESTIMONIALS ─────────────────────────────────────
+// User submit testimoni (hanya kalau punya pesanan 'selesai')
+app.post('/api/testimonials', authenticateToken, async (req, res) => {
+  try {
+    const { text, rating, order_id } = req.body;
+    if (!text || typeof text !== 'string' || text.trim().length < 5) {
+      return res.status(400).json({ error: 'Testimoni terlalu pendek (min 5 karakter).' });
+    }
+    if (text.trim().length > 500) {
+      return res.status(400).json({ error: 'Testimoni terlalu panjang (max 500 karakter).' });
+    }
+    const r = Number(rating);
+    if (!r || r < 1 || r > 5) {
+      return res.status(400).json({ error: 'Rating harus antara 1–5.' });
+    }
+    if (!order_id) {
+      return res.status(400).json({ error: 'order_id wajib.' });
+    }
+    // Pastikan pesanan milik user ini dan statusnya selesai
+    const [[order]] = await db.execute(
+      'SELECT id FROM orders WHERE id = ? AND user_id = ? AND status = \'selesai\'',
+      [order_id, req.user.id]
+    );
+    if (!order) {
+      return res.status(403).json({ error: 'Pesanan tidak ditemukan atau belum selesai.' });
+    }
+    // Satu pesanan satu testimoni
+    const [[existing]] = await db.execute(
+      'SELECT id FROM testimonials WHERE order_id = ?', [order_id]
+    );
+    if (existing) {
+      return res.status(400).json({ error: 'Kamu sudah pernah menulis testimoni untuk pesanan ini.' });
+    }
+    const [[user]] = await db.execute('SELECT name FROM users WHERE id = ?', [req.user.id]);
+    await db.execute(
+      'INSERT INTO testimonials (user_id, user_name, order_id, text, rating) VALUES (?, ?, ?, ?, ?)',
+      [req.user.id, user.name, order_id, text.trim(), r]
+    );
+    res.json({ message: 'Testimoni berhasil dikirim. Terima kasih!' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal menyimpan testimoni.' });
+  }
+});
+
+// Public: ambil semua testimoni yang sudah disetujui (untuk marquee di homepage)
+app.get('/api/testimonials', async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      'SELECT user_name, text, rating, created_at FROM testimonials WHERE hidden = 0 ORDER BY created_at DESC LIMIT 50'
+    );
+    res.json(rows);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal mengambil testimoni.' });
+  }
+});
+
+// User: cek order_id mana aja yang sudah pernah direview (untuk disable tombol "Tulis Testimoni")
+app.get('/api/testimonials/my-reviewed', authenticateToken, async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      'SELECT order_id FROM testimonials WHERE user_id = ?',
+      [req.user.id]
+    );
+    res.json(rows.map(r => r.order_id));
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal mengambil data.' });
+  }
+});
+
+// Admin: ambil semua testimoni (termasuk yang di-hide)
+app.get('/api/admin/testimonials', authenticateAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.execute(
+      'SELECT t.id, t.user_name, t.text, t.rating, t.hidden, t.created_at, t.order_id FROM testimonials t ORDER BY t.created_at DESC'
+    );
+    res.json(rows);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal mengambil testimoni.' });
+  }
+});
+
+// Admin: toggle hide/show testimoni
+app.patch('/api/admin/testimonials/:id/hide', authenticateAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.execute('SELECT id, hidden FROM testimonials WHERE id = ?', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Testimoni tidak ditemukan.' });
+    const newHidden = rows[0].hidden ? 0 : 1;
+    await db.execute('UPDATE testimonials SET hidden = ? WHERE id = ?', [newHidden, req.params.id]);
+    res.json({ hidden: newHidden, message: newHidden ? 'Testimoni disembunyikan.' : 'Testimoni ditampilkan kembali.' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal memperbarui testimoni.' });
+  }
+});
+
+// Admin: hapus testimoni permanen
+app.delete('/api/admin/testimonials/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const [rows] = await db.execute('SELECT id FROM testimonials WHERE id = ?', [req.params.id]);
+    if (!rows.length) return res.status(404).json({ error: 'Testimoni tidak ditemukan.' });
+    await db.execute('DELETE FROM testimonials WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Testimoni berhasil dihapus.' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Gagal menghapus testimoni.' });
+  }
+});
+
+
+
 // ─── NEWSLETTER ───────────────────────────────────────
+
 app.post('/api/newsletter/subscribe', async (req, res) => {
   try {
     const { email } = req.body;

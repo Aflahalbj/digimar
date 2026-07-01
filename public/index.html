@@ -49,6 +49,7 @@
           <li><a href="#features" class="nav-link">Keunggulan</a></li>
           <li><a href="#testimonials" class="nav-link">Testimoni</a></li>
           <li><a href="#contact" class="nav-link">Kontak</a></li>
+          <li id="myOrdersNavItem" style="display:none"><a href="#" class="nav-link" id="myOrdersBtn"><i class="fa-solid fa-box" style="margin-right:5px"></i>Pesanan Saya</a></li>
           <li id="authNavItem"><a href="login.html" class="nav-cta">Daftar</a></li>
         </ul>
       </div>
@@ -107,7 +108,7 @@
         </div>
         <div class="stat-divider"></div>
         <div class="stat-item">
-          <div class="stat-number" data-target="5000">0</div>
+          <div class="stat-number" data-target="1000">0</div>
           <div class="stat-label">Pelanggan Puas</div>
         </div>
         <div class="stat-divider"></div>
@@ -263,7 +264,7 @@
             </span>
           </div>
           <h3 class="feature-title">Komunitas Kolektor</h3>
-          <p class="feature-desc">Bergabung dengan 5.000+ kolektor aktif Indonesia. Share koleksi, diskusi, dan
+          <p class="feature-desc">Bergabung dengan 1.000+ kolektor aktif Indonesia. Share koleksi, diskusi, dan
             dapatkan info pre-order eksklusif lebih awal.</p>
         </div>
         <div class="feature-card" id="feat6">
@@ -290,7 +291,7 @@
       <p class="section-desc">Kami siap membeli koleksi diecast kesayanganmu dengan harga terbaik. Hubungi kami sekarang
         via WhatsApp!</p>
       <br>
-      <a href="https://wa.me/6281234567890?text=Halo%20Admin,%20saya%20ingin%20menjual%20koleksi%20diecast%20saya"
+      <a href="https://wa.me/6283138991304?text=Halo%20Admin,%20saya%20ingin%20menjual%20koleksi%20diecast%20saya"
         target="_blank" class="btn btn-white" id="promoBtn"
         style="display: inline-flex; align-items: center; gap: 8px;">
         <i class="fab fa-whatsapp" style="font-size: 1.2rem;"></i> Hubungi via WhatsApp
@@ -303,50 +304,14 @@
     <div class="section-container">
       <div class="section-header">
         <div class="section-tag">Kata Mereka</div>
-        <h2 class="section-title">Dipercaya <span class="gradient-text">5.000+</span> Kolektor</h2>
+        <h2 class="section-title">Dipercaya <span class="gradient-text">1.000+</span> Kolektor</h2>
         <p class="section-desc">Jangan cuma percaya kata kami — dengar langsung dari para kolektor yang sudah buktikan
           sendiri.</p>
       </div>
-
-      <div class="testimonials-grid">
-        <div class="testimonial-card" id="testi1">
-          <div class="testi-stars">★★★★★</div>
-          <p class="testi-text">"Kualitasnya luar biasa! Ferrari 488 yang gue beli detail banget sampai ke interior.
-            Packaging-nya juga rapi dan aman. Ini jadi favorit di koleksi gue!"</p>
-          <div class="testi-author">
-            <div class="testi-avatar">
-              <img src="assets/rizky.png" alt="Rizky">
-            </div>
-            <div class="testi-info">
-              <div class="testi-name">Rizky Dwi</div>
-            </div>
-          </div>
-        </div>
-        <div class="testimonial-card" id="testi2">
-          <div class="testi-stars">★★★★★</div>
-          <p class="testi-text">"Udah beli 15+ item dari DIECASTKU dan gak pernah kecewa sekalipun. Harganya
-            fair,
-            pelayanannya cepat, dan komunitasnya seru banget. Highly recommended buat kolektor Indonesia!"</p>
-          <div class="testi-author">
-            <div class="testi-avatar">
-              <img src="assets/andi.png" alt="Andi">
-            </div>
-            <div class="testi-info">
-              <div class="testi-name">Andi Pratama</div>
-            </div>
-          </div>
-        </div>
-        <div class="testimonial-card" id="testi3">
-          <div class="testi-stars">★★★★★</div>
-          <p class="testi-text">"Limited edition Lamborghini gold-nya WOW banget. Nilainya udah naik dari harga beli.
-            DIECASTKU emang tempat invest yang tepat buat para kolektor!"</p>
-          <div class="testi-author">
-            <div class="testi-avatar"><img src="assets/siti.png" alt="Siti">
-            </div>
-            <div class="testi-info">
-              <div class="testi-name">Siti Rahayu</div>
-            </div>
-          </div>
+      <!-- Marquee testimoni real dari user, diisi dinamis oleh JS -->
+      <div class="testi-marquee-wrap" id="testiMarqueeWrap">
+        <div class="testi-marquee-track" id="testiMarqueeTrack">
+          <!-- item digenerate JS -->
         </div>
       </div>
     </div>
@@ -404,7 +369,7 @@
           <span class="logo-text">DIECAST<span class="logo-accent">KU</span></span>
         </a>
         <p class="footer-tagline">Premium Diecast Scale Models<br />Indonesia's #1 Collectibles Store<br>Special thanks
-          to Ddsiaz Design, Vecarz</p>
+          to Ddiaz Design, Vecarz</p>
       </div>
       <div class="footer-links-grid">
         <div class="footer-col">
@@ -438,7 +403,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p>© 2024 DIECASTKU. All rights reserved.</p>
+      <p>© 2026 DIECASTKU. All rights reserved.</p>
     </div>
   </footer>
 
@@ -478,6 +443,65 @@
   <div class="toast" id="toast">
     <span class="toast-icon"><i class="fa-solid fa-cart-shopping"></i></span>
     <span class="toast-msg" id="toastMsg">Item ditambahkan ke keranjang!</span>
+  </div>
+
+  <!-- PESANAN SAYA MODAL (full overlay) -->
+  <div class="modal-overlay" id="ordersOverlay"></div>
+  <div class="orders-panel" id="ordersPanel">
+    <div class="orders-panel-header">
+      <div>
+        <h2 class="orders-panel-title"><i class="fa-solid fa-box" style="color:var(--primary)"></i> Pesanan Saya</h2>
+        <p class="orders-panel-sub">Riwayat & status pesanan kamu</p>
+      </div>
+      <button class="orders-panel-close" id="ordersPanelClose"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="orders-panel-body" id="ordersPanelBody">
+      <div class="orders-loading"><span class="orders-spinner"></span> Memuat pesanan...</div>
+    </div>
+  </div>
+
+  <!-- POPUP: INFORMASI PENGEMBALIAN -->
+  <div class="modal-overlay" id="returnOverlay"></div>
+  <div class="mini-popup" id="returnPopup">
+    <button class="mini-popup-close" id="returnPopupClose"><i class="fa-solid fa-xmark"></i></button>
+    <div class="mini-popup-icon"><i class="fa-solid fa-rotate-left" style="color:var(--primary)"></i></div>
+    <h3 class="mini-popup-title">Pengembalian Barang</h3>
+    <p class="mini-popup-body">Pengembalian barang hanya dapat dilakukan secara <strong>offline</strong> di toko kami. Silakan datang langsung dengan membawa:</p>
+    <ul class="mini-popup-list">
+      <li><i class="fa-solid fa-circle-check"></i> Barang yang ingin dikembalikan (kondisi asli/original)</li>
+      <li><i class="fa-solid fa-circle-check"></i> Bukti pesanan (screenshot / nomor order)</li>
+      <li><i class="fa-solid fa-circle-check"></i> KTP / identitas diri</li>
+    </ul>
+    <div class="mini-popup-note">
+      <i class="fa-solid fa-location-dot"></i>
+      <span>Temui kami di <strong>Offline Store DIECASTKU</strong> — Jam operasional: Senin–Sabtu, 09.00–17.00 WIB</span>
+    </div>
+    <a href="https://wa.me/6283138991304?text=Halo%20admin%2C%20saya%20ingin%20melakukan%20pengembalian%20barang"
+       target="_blank" class="btn btn-wa" style="width:100%;justify-content:center;margin-top:4px">
+      <i class="fab fa-whatsapp"></i> Hubungi Admin Dulu
+    </a>
+  </div>
+
+  <!-- POPUP: TULIS TESTIMONI -->
+  <div class="modal-overlay" id="testiOverlay"></div>
+  <div class="mini-popup" id="testiPopup">
+    <button class="mini-popup-close" id="testiPopupClose"><i class="fa-solid fa-xmark"></i></button>
+    <div class="mini-popup-icon"><i class="fa-solid fa-star" style="color:var(--gold)"></i></div>
+    <h3 class="mini-popup-title">Tulis Testimoni</h3>
+    <p class="mini-popup-body" id="testiPopupOrderLabel" style="color:var(--text-muted);font-size:0.85rem"></p>
+    <div class="testi-star-input" id="testiStarInput">
+      <span class="testi-star-btn" data-val="1">★</span>
+      <span class="testi-star-btn" data-val="2">★</span>
+      <span class="testi-star-btn" data-val="3">★</span>
+      <span class="testi-star-btn" data-val="4">★</span>
+      <span class="testi-star-btn" data-val="5">★</span>
+    </div>
+    <textarea id="testiTextInput" class="testi-textarea" placeholder="Ceritain pengalaman kamu beli di DIECASTKU..." rows="4" maxlength="500"></textarea>
+    <div style="text-align:right;font-size:0.75rem;color:var(--text-muted);margin-top:-8px;margin-bottom:10px"><span id="testiCharCount">0</span>/500</div>
+    <button class="btn btn-primary" id="testiSubmitBtn" style="width:100%;justify-content:center">
+      <i class="fa-solid fa-paper-plane"></i> Kirim Testimoni
+    </button>
+    <p id="testiSubmitError" style="color:var(--danger);font-size:0.82rem;margin-top:8px;display:none"></p>
   </div>
 
   <script src="script.js"></script>

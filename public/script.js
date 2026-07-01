@@ -1054,6 +1054,7 @@ function checkAuth() {
   const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   const authNavItem = document.getElementById('authNavItem');
+  const myOrdersNavItem = document.getElementById('myOrdersNavItem');
 
   if (token && userStr && authNavItem) {
     const user = JSON.parse(userStr);
@@ -1062,25 +1063,28 @@ function checkAuth() {
         Logout
       </a>
     `;
+    if (myOrdersNavItem) myOrdersNavItem.style.display = 'list-item';
 
     document.getElementById('logoutBtn').addEventListener('click', (e) => {
       e.preventDefault();
       localStorage.removeItem('token');
       localStorage.removeItem('user');
-      cart = []; // Kosongkan keranjang saat logout
+      cart = [];
+      selectedCartKeys.clear();
+      knownCartKeys.clear();
       _suppressSync = true;
       updateBadge();
       renderCart();
       _suppressSync = false;
-      checkAuth(); // Refresh UI
+      if (myOrdersNavItem) myOrdersNavItem.style.display = 'none';
+      checkAuth();
       showToast('Berhasil logout', '👋');
     });
 
     loadCart();
   } else if (authNavItem) {
-    authNavItem.innerHTML = `
-      <a href="login.html" class="nav-cta">Daftar</a>
-    `;
+    authNavItem.innerHTML = `<a href="login.html" class="nav-cta">Daftar</a>`;
+    if (myOrdersNavItem) myOrdersNavItem.style.display = 'none';
   }
 }
 
@@ -1089,7 +1093,284 @@ const debouncedSync = debounce(syncCart, 800);
 
 document.addEventListener('DOMContentLoaded', () => {
   checkAuth();
+  initOrdersPanel();
+  loadTestimonialMarquee();
 });
+
+/* ─────────────────────────────────────────────────────
+   PESANAN SAYA PANEL
+   ───────────────────────────────────────────────────── */
+const ORDER_STATUS_LABELS = {
+  pending:      'Menunggu Konfirmasi',
+  rejected:     'Ditolak',
+  belum_bayar:  'Belum Bayar',
+  dikemas:      'Dikemas',
+  dikirim:      'Dikirim',
+  selesai:      'Selesai',
+  pengembalian: 'Pengembalian',
+  dibatalkan:   'Dibatalkan',
+};
+
+function fmtRp(n) { return 'Rp ' + Number(n).toLocaleString('id-ID'); }
+function fmtTanggal(s) {
+  return new Date(s).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function openOrdersPanel() {
+  document.getElementById('ordersPanel')?.classList.add('open');
+  document.getElementById('ordersOverlay')?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  loadMyOrders();
+}
+function closeOrdersPanel() {
+  document.getElementById('ordersPanel')?.classList.remove('open');
+  document.getElementById('ordersOverlay')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function loadMyOrders() {
+  const body = document.getElementById('ordersPanelBody');
+  const token = localStorage.getItem('token');
+  if (!token) { body.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:60px 0">Login dulu ya untuk melihat pesanan.</p>'; return; }
+  body.innerHTML = '<div class="orders-loading"><span class="orders-spinner"></span> Memuat pesanan...</div>';
+  try {
+    const res = await fetch(`${API_URL}/orders/my`, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) throw new Error();
+    const orders = await res.json();
+    renderMyOrders(orders, body);
+  } catch {
+    body.innerHTML = '<p style="text-align:center;color:var(--danger);padding:60px 0">Gagal memuat pesanan. Coba lagi.</p>';
+  }
+}
+
+function renderMyOrders(orders, container) {
+  if (!orders.length) {
+    container.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:60px 0">Belum ada pesanan.</p>';
+    return;
+  }
+  container.innerHTML = orders.map(o => {
+    const items = Array.isArray(o.items) ? o.items : [];
+    const itemHTML = items.map(it =>
+      `<div class="my-order-item-row">
+        <span class="item-name">${it.name}${it.brand ? ` <span style="color:var(--text-muted);font-weight:400">[${it.brand}]</span>` : ''}</span>
+        <span>${it.qty}x &nbsp;${fmtRp(it.price * it.qty)}</span>
+      </div>`
+    ).join('');
+
+    const statusLabel = ORDER_STATUS_LABELS[o.status] || o.status;
+
+    // Tombol pengembalian + testimoni muncul kalau status 'selesai'
+    let actionBtns = '';
+    if (o.status === 'selesai') {
+      actionBtns = `
+        <button class="btn-return" onclick="openReturnPopup()">
+          <i class="fa-solid fa-rotate-left"></i> Pengembalian
+        </button>
+        <button class="btn-testi" id="testiBtn_${o.id}" onclick="openTestiPopup(${o.id}, '${fmtTanggal(o.created_at)}')">
+          <i class="fa-solid fa-star"></i> Tulis Testimoni
+        </button>`;
+    }
+
+    return `
+    <div class="my-order-card">
+      <div class="my-order-card-head">
+        <div>
+          <div class="my-order-date">${fmtTanggal(o.created_at)}</div>
+          <div class="my-order-id">Order #${o.id}</div>
+        </div>
+        <span class="my-order-status-pill ${o.status}">${statusLabel}</span>
+      </div>
+      <div class="my-order-items">${itemHTML}</div>
+      <div class="my-order-card-foot">
+        <div class="my-order-total">${fmtRp(o.total)}</div>
+        <div class="my-order-actions">${actionBtns}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Disable tombol "Tulis Testimoni" untuk order yang sudah pernah direview
+  checkReviewedOrders(orders);
+}
+
+async function checkReviewedOrders(orders) {
+  const token = localStorage.getItem('token');
+  if (!token) return;
+  try {
+    const res = await fetch(`${API_URL}/testimonials/my-reviewed`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) return;
+    const reviewed = await res.json(); // array of order_id yang sudah direview
+    reviewed.forEach(orderId => {
+      const btn = document.getElementById(`testiBtn_${orderId}`);
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Sudah Diulas';
+      }
+    });
+  } catch { /* silent */ }
+}
+
+function initOrdersPanel() {
+  const btn = document.getElementById('myOrdersBtn');
+  const overlay = document.getElementById('ordersOverlay');
+  const closeBtn = document.getElementById('ordersPanelClose');
+  if (btn) btn.addEventListener('click', (e) => { e.preventDefault(); openOrdersPanel(); });
+  if (overlay) overlay.addEventListener('click', closeOrdersPanel);
+  if (closeBtn) closeBtn.addEventListener('click', closeOrdersPanel);
+
+  // Pengembalian popup
+  const retOverlay = document.getElementById('returnOverlay');
+  const retClose = document.getElementById('returnPopupClose');
+  if (retOverlay) retOverlay.addEventListener('click', closeReturnPopup);
+  if (retClose) retClose.addEventListener('click', closeReturnPopup);
+
+  // Testimoni popup
+  const testiOverlay = document.getElementById('testiOverlay');
+  const testiClose = document.getElementById('testiPopupClose');
+  if (testiOverlay) testiOverlay.addEventListener('click', closeTestiPopup);
+  if (testiClose) testiClose.addEventListener('click', closeTestiPopup);
+
+  // Star rating
+  const stars = document.querySelectorAll('.testi-star-btn');
+  let selectedRating = 5;
+  stars.forEach(star => {
+    star.addEventListener('mouseover', () => highlightStars(Number(star.dataset.val)));
+    star.addEventListener('mouseout', () => highlightStars(selectedRating));
+    star.addEventListener('click', () => {
+      selectedRating = Number(star.dataset.val);
+      highlightStars(selectedRating);
+      document.getElementById('testiPopup').dataset.rating = selectedRating;
+    });
+  });
+  highlightStars(5);
+  if (document.getElementById('testiPopup')) document.getElementById('testiPopup').dataset.rating = 5;
+
+  // Char counter
+  const textarea = document.getElementById('testiTextInput');
+  if (textarea) textarea.addEventListener('input', () => {
+    document.getElementById('testiCharCount').textContent = textarea.value.length;
+  });
+
+  // Submit
+  const submitBtn = document.getElementById('testiSubmitBtn');
+  if (submitBtn) submitBtn.addEventListener('click', submitTestimoni);
+}
+
+function highlightStars(n) {
+  document.querySelectorAll('.testi-star-btn').forEach(s => {
+    s.classList.toggle('active', Number(s.dataset.val) <= n);
+  });
+}
+
+function openReturnPopup() {
+  document.getElementById('returnPopup')?.classList.add('open');
+  document.getElementById('returnOverlay')?.classList.add('open');
+}
+function closeReturnPopup() {
+  document.getElementById('returnPopup')?.classList.remove('open');
+  document.getElementById('returnOverlay')?.classList.remove('open');
+}
+
+function openTestiPopup(orderId, dateStr) {
+  const popup = document.getElementById('testiPopup');
+  if (!popup) return;
+  popup.dataset.orderId = orderId;
+  popup.dataset.rating = 5;
+  document.getElementById('testiPopupOrderLabel').textContent = `Pesanan #${orderId} · ${dateStr}`;
+  document.getElementById('testiTextInput').value = '';
+  document.getElementById('testiCharCount').textContent = '0';
+  document.getElementById('testiSubmitError').style.display = 'none';
+  highlightStars(5);
+  popup.classList.add('open');
+  document.getElementById('testiOverlay')?.classList.add('open');
+}
+function closeTestiPopup() {
+  document.getElementById('testiPopup')?.classList.remove('open');
+  document.getElementById('testiOverlay')?.classList.remove('open');
+}
+
+async function submitTestimoni() {
+  const popup = document.getElementById('testiPopup');
+  const orderId = popup.dataset.orderId;
+  const rating = Number(popup.dataset.rating) || 5;
+  const text = document.getElementById('testiTextInput').value.trim();
+  const errEl = document.getElementById('testiSubmitError');
+  const btn = document.getElementById('testiSubmitBtn');
+  const token = localStorage.getItem('token');
+
+  errEl.style.display = 'none';
+  if (!text || text.length < 5) { errEl.textContent = 'Testimoni terlalu pendek (min 5 karakter).'; errEl.style.display = 'block'; return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mengirim...';
+  try {
+    const res = await fetch(`${API_URL}/testimonials`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ text, rating, order_id: Number(orderId) }),
+    });
+    const data = await res.json();
+    if (!res.ok) { errEl.textContent = data.error || 'Gagal mengirim.'; errEl.style.display = 'block'; return; }
+    closeTestiPopup();
+    showToast('Testimoni berhasil dikirim! Terima kasih 🙏', '⭐');
+    // Disable tombol testimoni untuk order ini
+    const testiBtn = document.getElementById(`testiBtn_${orderId}`);
+    if (testiBtn) { testiBtn.disabled = true; testiBtn.innerHTML = '<i class="fa-solid fa-check"></i> Sudah Diulas'; }
+    // Reload marquee biar langsung muncul
+    loadTestimonialMarquee();
+  } catch {
+    errEl.textContent = 'Terjadi kesalahan. Coba lagi.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Kirim Testimoni';
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   TESTIMONI MARQUEE (dynamic, dari DB)
+   ───────────────────────────────────────────────────── */
+async function loadTestimonialMarquee() {
+  const track = document.getElementById('testiMarqueeTrack');
+  const wrap = document.getElementById('testiMarqueeWrap');
+  if (!track) return;
+  try {
+    const res = await fetch(`${API_URL}/testimonials`);
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      wrap.innerHTML = '<p class="testi-empty">Belum ada testimoni. Jadilah yang pertama! ⭐</p>';
+      return;
+    }
+    // Duplicate items for seamless loop (need 2x for infinite scroll)
+    const items = [...data, ...data];
+    track.innerHTML = items.map((t, i) => {
+      const avatarNum = (i % 13) + 1;
+      const avatarSrc = `/assets/avatar/user (${avatarNum}).png`;
+      const stars = '★'.repeat(Math.min(5, Math.max(1, t.rating))) + '☆'.repeat(5 - Math.min(5, Math.max(1, t.rating)));
+      const date = new Date(t.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+      return `
+      <div class="testi-marquee-card">
+        <div class="testi-marquee-stars">${stars}</div>
+        <p class="testi-marquee-text">"${t.text}"</p>
+        <div class="testi-marquee-author">
+          <img class="testi-marquee-avatar" src="${avatarSrc}" alt="${t.user_name}" onerror="this.outerHTML='<div class=\"testi-marquee-avatar\">
+          <div>
+            <div class="testi-marquee-name">${t.user_name}</div>
+            <div class="testi-marquee-date">${date}</div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    // Adjust animation speed based on count (more items = slower to allow reading)
+    const duration = Math.max(20, data.length * 7);
+    track.style.animationDuration = duration + 's';
+  } catch (e) {
+    console.error('Gagal load testimoni:', e);
+  }
+}
+
+
 
 /* ─────────────────────────────────────────────────────
    ANALYTICS TRACKER

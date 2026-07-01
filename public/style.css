@@ -2132,3 +2132,414 @@ ul {
     max-width: 100%;
   }
 }
+
+/* ============ MODAL OVERLAY (shared) ============ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+  z-index: 1198;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* ============ PESANAN SAYA PANEL ============ */
+.orders-panel {
+  position: fixed;
+  top: 0; right: 0;
+  width: 100%;
+  max-width: 520px;
+  height: 100%;
+  background: #070c14;
+  border-left: 1px solid rgba(249,115,22,0.15);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(110%);
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+  box-shadow: -10px 0 60px rgba(0,0,0,0.7);
+}
+.orders-panel.open {
+  transform: translateX(0);
+}
+.orders-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(249,115,22,0.05);
+  flex-shrink: 0;
+}
+.orders-panel-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 4px;
+}
+.orders-panel-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+.orders-panel-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+.orders-panel-close:hover {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.06);
+}
+.orders-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.orders-loading {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 60px 0;
+  font-size: 0.9rem;
+}
+.orders-spinner {
+  display: inline-block;
+  width: 18px; height: 18px;
+  border: 2px solid rgba(249,115,22,0.25);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Order card (user-facing) */
+.my-order-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.my-order-card:hover { border-color: var(--border-hover); }
+.my-order-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.my-order-date {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.my-order-id {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.my-order-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.my-order-status-pill.pending      { background:rgba(245,158,11,.15);  color:var(--gold);    }
+.my-order-status-pill.rejected     { background:rgba(239,68,68,.15);   color:var(--danger);  }
+.my-order-status-pill.belum_bayar  { background:rgba(245,158,11,.15);  color:var(--gold);    }
+.my-order-status-pill.dikemas      { background:rgba(59,130,246,.15);  color:#60a5fa;        }
+.my-order-status-pill.dikirim      { background:rgba(168,85,247,.15);  color:#c084fc;        }
+.my-order-status-pill.selesai      { background:rgba(34,197,94,.15);   color:var(--success); }
+.my-order-status-pill.pengembalian { background:rgba(249,115,22,.15);  color:var(--primary); }
+.my-order-status-pill.dibatalkan   { background:rgba(239,68,68,.15);   color:var(--danger);  }
+
+.my-order-items {
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.my-order-item-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.83rem;
+  color: var(--text-secondary);
+}
+.my-order-item-row .item-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.my-order-card-foot {
+  padding: 12px 18px 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.my-order-total {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 1rem;
+}
+.my-order-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn-return, .btn-testi {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-family: var(--font-main);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: var(--transition);
+}
+.btn-return {
+  background: rgba(249,115,22,.12);
+  color: var(--primary);
+  border: 1px solid rgba(249,115,22,.3);
+}
+.btn-return:hover { background: rgba(249,115,22,.22); }
+.btn-testi {
+  background: rgba(245,158,11,.12);
+  color: var(--gold);
+  border: 1px solid rgba(245,158,11,.3);
+}
+.btn-testi:hover { background: rgba(245,158,11,.22); }
+.btn-testi:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ============ MINI POPUP (pengembalian / testimoni) ============ */
+.mini-popup {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -46%) scale(0.94);
+  z-index: 1210;
+  width: 90%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #0a1020;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 28px 26px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+}
+.mini-popup.open {
+  opacity: 1;
+  pointer-events: all;
+  transform: translate(-50%, -50%) scale(1);
+}
+.mini-popup-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+.mini-popup-close:hover { color: var(--text-primary); background: rgba(255,255,255,0.06); }
+.mini-popup-icon {
+  font-size: 2.2rem;
+  margin-bottom: 14px;
+}
+.mini-popup-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+.mini-popup-body {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+.mini-popup-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mini-popup-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+.mini-popup-list li i { color: var(--success); margin-top: 2px; flex-shrink: 0; }
+.mini-popup-note {
+  background: rgba(249,115,22,0.08);
+  border: 1px solid rgba(249,115,22,0.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 0.83rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+.mini-popup-note i { color: var(--primary); margin-top: 2px; flex-shrink: 0; }
+
+/* ── STAR RATING INPUT ── */
+.testi-star-input {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.testi-star-btn {
+  font-size: 1.8rem;
+  cursor: pointer;
+  color: var(--border);
+  transition: color 0.15s, transform 0.15s;
+  line-height: 1;
+}
+.testi-star-btn.active { color: var(--gold); }
+.testi-star-btn:hover { transform: scale(1.2); }
+.testi-textarea {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  font-size: 0.88rem;
+  padding: 12px 14px;
+  resize: vertical;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+.testi-textarea:focus {
+  outline: none;
+  border-color: rgba(249,115,22,0.5);
+}
+
+/* ============ TESTIMONI MARQUEE ============ */
+.testi-marquee-wrap {
+  position: relative;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 8%, #000 92%, transparent 100%);
+  margin-top: 40px;
+}
+.testi-marquee-track {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+  animation: testiScroll 35s linear infinite;
+}
+.testi-marquee-track:hover { animation-play-state: paused; }
+@keyframes testiScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.testi-marquee-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 22px 18px;
+  width: 300px;
+  flex-shrink: 0;
+  transition: border-color 0.2s;
+}
+.testi-marquee-card:hover { border-color: var(--border-hover); }
+.testi-marquee-stars { color: var(--gold); font-size: 0.95rem; margin-bottom: 10px; }
+.testi-marquee-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-style: italic;
+  margin-bottom: 14px;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.testi-marquee-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.testi-marquee-avatar {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  /* background: linear-gradient(135deg, var(--primary), #c2410c); */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #fff;
+  flex-shrink: 0;
+  object-fit: cover;
+  overflow: hidden;
+}
+.testi-marquee-name {
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+.testi-marquee-date {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+.testi-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 40px 0;
+}
+
+@media (max-width: 600px) {
+  .orders-panel { max-width: 100%; }
+  .mini-popup { padding: 22px 18px; }
+}

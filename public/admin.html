@@ -1035,6 +1035,74 @@
             background: rgba(239, 68, 68, 0.2);
         }
 
+        /* ── ADMIN TESTI CARDS ───────────────────────────── */
+        .testi-admin-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 18px 20px;
+            transition: border-color 0.2s;
+        }
+        .testi-admin-card.is-hidden {
+            opacity: 0.5;
+            border-style: dashed;
+        }
+        .testi-admin-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        .testi-admin-user {
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .testi-admin-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .testi-admin-stars { color: var(--gold); font-size: 0.85rem; }
+        .testi-admin-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-style: italic;
+            line-height: 1.6;
+            margin-bottom: 14px;
+            border-left: 3px solid var(--border);
+            padding-left: 12px;
+        }
+        .testi-admin-actions { display: flex; gap: 8px; }
+        .btn-testi-hide, .btn-testi-del {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-family: var(--font-main);
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+        }
+        .btn-testi-hide {
+            background: rgba(100,116,139,0.12);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        .btn-testi-hide:hover { background: rgba(100,116,139,0.22); color: var(--text-primary); }
+        .btn-testi-hide.showing {
+            background: rgba(34,197,94,0.1);
+            color: var(--success);
+            border-color: rgba(34,197,94,0.3);
+        }
+        .btn-testi-del {
+            background: rgba(239,68,68,0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239,68,68,0.25);
+        }
+        .btn-testi-del:hover { background: rgba(239,68,68,0.2); }
+
         /* ── MODAL ──────────────────────────────────────── */
         .modal-overlay {
             position: fixed;
@@ -1350,6 +1418,9 @@
                 </button>
                 <button class="nav-item" data-page="orders-crud">
                     <i class="fas fa-receipt"></i> Kelola Pesanan
+                </button>
+                <button class="nav-item" data-page="testimonials-crud">
+                    <i class="fas fa-star"></i> Testimoni
                 </button>
 
                 <button class="nav-item" data-page="broadcast">
@@ -1673,6 +1744,28 @@
                 </div>
             </div>
 
+            <!-- PAGE: TESTIMONIALS CRUD -->
+            <div class="page" id="page-testimonials-crud">
+                <div class="pm-toolbar">
+                    <div class="pm-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="testiSearch" placeholder="Cari testimoni (nama / isi)...">
+                    </div>
+                    <select class="form-select" id="testiVisFilter" style="max-width:170px">
+                        <option value="">Semua</option>
+                        <option value="visible">Ditampilkan</option>
+                        <option value="hidden">Disembunyikan</option>
+                    </select>
+                    <div style="color:var(--text-muted);font-size:0.85rem;display:flex;align-items:center;gap:6px">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="testiCountLabel">Memuat...</span>
+                    </div>
+                </div>
+                <div id="testiAdminList" style="display:flex;flex-direction:column;gap:14px">
+                    <div class="loading-row" style="padding:40px;text-align:center"><span class="spinner"></span></div>
+                </div>
+            </div>
+
             <!-- PAGE: BROADCAST EMAIL -->
             <div class="page" id="page-broadcast">
               <div style="max-width:680px;width:100%">
@@ -1963,6 +2056,7 @@
             'products-crud': ['Kelola Produk', 'Tambah, edit, dan hapus produk'],
             'users-crud': ['Kelola Pengguna', 'Daftar semua pengguna terdaftar'],
             'orders-crud': ['Kelola Pesanan', 'Pesanan dari checkout WhatsApp user'],
+            'testimonials-crud': ['Testimoni', 'Kelola ulasan dari pembeli'],
             'broadcast': ['Kirim Email Promo', 'Broadcast pesan promosi ke pengguna & subscriber'],
         };
         function loadPage(page) {
@@ -1977,7 +2071,7 @@
             document.getElementById('pageTitle').textContent = meta[0];
             document.getElementById('pageSub').textContent = meta[1];
             const rangeWrap = document.getElementById('rangeSelect').parentElement;
-            rangeWrap.style.display = (page === 'products-crud' || page === 'users-crud' || page === 'orders-crud' || page === 'broadcast') ? 'none' : 'flex';
+            rangeWrap.style.display = (page === 'products-crud' || page === 'users-crud' || page === 'orders-crud' || page === 'testimonials-crud' || page === 'broadcast') ? 'none' : 'flex';
             fetchPageData(page);
         }
 
@@ -1992,6 +2086,7 @@
                 if (page === 'products-crud') await fetchProductsCRUD();
                 if (page === 'users-crud') await fetchUsersCRUD();
                 if (page === 'orders-crud') await fetchOrdersCRUD();
+                if (page === 'testimonials-crud') await fetchTestimonialsCRUD();
                 if (page === 'broadcast') await loadBroadcastPage();
             } catch (e) {
                 showToast('Gagal memuat data: ' + e.message, 'error');
@@ -2244,6 +2339,82 @@
             );
             renderOrdersList(filtered);
         });
+
+        /* ────────────────────────────────────────────────────
+           TESTIMONI CRUD
+        ──────────────────────────────────────────────────── */
+        let allTestis = [];
+
+        async function fetchTestimonialsCRUD() {
+            const data = await api('/admin/testimonials');
+            allTestis = data;
+            applyTestiFilter();
+        }
+
+        function applyTestiFilter() {
+            const q = (document.getElementById('testiSearch')?.value || '').trim().toLowerCase();
+            const vis = document.getElementById('testiVisFilter')?.value || '';
+            let filtered = allTestis;
+            if (q) filtered = filtered.filter(t => t.user_name.toLowerCase().includes(q) || t.text.toLowerCase().includes(q));
+            if (vis === 'visible') filtered = filtered.filter(t => !t.hidden);
+            if (vis === 'hidden') filtered = filtered.filter(t => t.hidden);
+            renderTestiAdminList(filtered);
+        }
+
+        function renderTestiAdminList(items) {
+            const wrap = document.getElementById('testiAdminList');
+            const label = document.getElementById('testiCountLabel');
+            if (label) label.textContent = items.length + ' testimoni';
+            if (!items.length) {
+                wrap.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:60px">Belum ada testimoni</div>';
+                return;
+            }
+            wrap.innerHTML = items.map(t => {
+                const stars = '★'.repeat(Math.min(5, t.rating)) + '☆'.repeat(5 - Math.min(5, t.rating));
+                const date = new Date(t.created_at).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                return `
+        <div class="testi-admin-card ${t.hidden ? 'is-hidden' : ''}">
+          <div class="testi-admin-head">
+            <div>
+              <div class="testi-admin-user">${t.user_name} <span style="font-weight:400;color:var(--text-muted)">· Order #${t.order_id}</span></div>
+              <div class="testi-admin-meta">${date} ${t.hidden ? '&nbsp;<span style="color:var(--danger);font-weight:700;font-size:0.7rem">HIDDEN</span>' : ''}</div>
+            </div>
+            <div class="testi-admin-stars">${stars}</div>
+          </div>
+          <div class="testi-admin-text">"${t.text}"</div>
+          <div class="testi-admin-actions">
+            <button class="btn-testi-hide ${!t.hidden ? 'showing' : ''}" onclick="toggleHideTesti(${t.id})">
+              <i class="fas fa-${t.hidden ? 'eye' : 'eye-slash'}"></i> ${t.hidden ? 'Tampilkan' : 'Sembunyikan'}
+            </button>
+            <button class="btn-testi-del" onclick="deleteTesti(${t.id})">
+              <i class="fas fa-trash"></i> Hapus
+            </button>
+          </div>
+        </div>`;
+            }).join('');
+        }
+
+        async function toggleHideTesti(id) {
+            try {
+                const data = await api(`/admin/testimonials/${id}/hide`, { method: 'PATCH' });
+                showToast(data.message);
+                fetchTestimonialsCRUD();
+            } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        async function deleteTesti(id) {
+            if (!confirm('Hapus testimoni ini permanen?')) return;
+            try {
+                await api(`/admin/testimonials/${id}`, { method: 'DELETE' });
+                showToast('Testimoni dihapus.');
+                fetchTestimonialsCRUD();
+            } catch (e) { showToast(e.message, 'error'); }
+        }
+
+        document.getElementById('testiSearch')?.addEventListener('input', applyTestiFilter);
+        document.getElementById('testiVisFilter')?.addEventListener('change', applyTestiFilter);
+
+
 
         async function deleteUser() {
             if (!deleteTargetUserId) return;
