@@ -37,7 +37,7 @@ function attachBrandLogoFallbacks() { /* noop - handled inline via onerror */ }
 
 
 // ─── WHATSAPP CONFIG ───────────────────────────────
-const WA_NUMBER = '6283138991304'; // ← Ganti dengan nomor WA toko
+const WA_NUMBER = '6285179596185'; // ← Ganti dengan nomor WA toko
 
 // ─── CART STATE ────────────────────────────────────
 let cart = []; // [{ id, name, price, emoji, qty }]
